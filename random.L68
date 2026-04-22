@@ -1,0 +1,101 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/6/2024 2:48:09 PM
+
+00000000                             1  *************************************************************************************
+00000000                             2  *                                                       *
+00000000                             3  *   Pseudo random number generator for the EASy68k simulator    2006/01/10      *
+00000000                             4  *                                                       *
+00000000                             5  *   This code is an attempt to gauge the effectiveness of variations on the     *
+00000000                             6  *   shift register type of pseudo random number generator. The PRNG code is     *
+00000000                             7  *   similar to that used in the RND() function in EhBASIC68.                *
+00000000                             8  *                                                       *
+00000000                             9  *   More 68000 and other projects can be found on my website at ..          *
+00000000                            10  *                                                       *
+00000000                            11  *    http://mycorner.no-ip.org/index.html                           *
+00000000                            12  *                                                       *
+00000000                            13  *   mail : leeedavison@googlemail.com                               *
+00000000                            14  *                                                       *
+00000000                            15  *************************************************************************************
+00000000                            16  
+00000000                            17  *************************************************************************************
+00000000                            18  * This is the code that generates the pseudo random sequence. A seed word located in
+00000000                            19  * PRNlword(a3) is loaded into a register before being operated on to generate the
+00000000                            20  * next number in the sequence. This number is then saved as the seed for the next
+00000000                            21  * time it's called.
+00000000                            22  *
+00000000                            23  * This code is adapted from the 32 bit version of RND(n) used in EhBASIC68. Taking
+00000000                            24  * the 19th next number is slower but helps to hide the shift and add nature of this
+00000000                            25  * generator as can be seen from analysing the output.
+00000000                            26  
+00000000                            27  LAB_RND
+Line 28 ERROR: Invalid syntax
+00000000                            28      sub.l   #LONG_OFFSET*3, sp
+00000000  48D7 0007                 29      movem.l d0-d2, (sp)         ; Save context
+00000004                            30      
+00000004  202B 0040                 31      MOVE.l  PRNlword(a3),d0     * get current seed longword
+00000008  72AF                      32      MOVEQ       #$AF-$100,d1        * set EOR value
+0000000A  7412                      33      MOVEQ       #18,d2          * do this 19 times
+Line 34 ERROR: Symbol value differs between first and second pass
+0000000C                            34  Ninc0
+0000000C  D080                      35      ADD.l       d0,d0               * shift left 1 bit
+0000000E  6408                      36      BCC.s       Ninc1               * if bit not set skip feedback
+00000010                            37  
+00000010  B300                      38      EOR.b       d1,d0               * do Galois LFSR feedback
+Line 39 ERROR: Symbol value differs between first and second pass
+00000012                            39  Ninc1
+00000012  51CA FFFE                 40      DBF     d2,Ninc0            * loop
+00000016                            41  
+00000016  2740 0040                 42      MOVE.l  d0,PRNlword(a3)     * save back to seed longword
+0000001A                            43  
+0000001A  4CD7 0007                 44      movem.l (sp), d0-d2
+Line 45 ERROR: Invalid syntax
+0000001E                            45      add.l   #LONG_OFFSET*3, sp  ; Load context
+0000001E  4E75                      46      RTS
+00000020                            47  
+Line 48 ERROR: Symbol value differs between first and second pass
+00000020                            48  randomRange:
+00000020                            49  * Author:       Pon Jumruspun
+00000020                            50  * Date:         6/6/2024
+00000020                            51  * Description:  Custom function to random a number between [0, d6) using DIVU
+00000020                            52  
+00000020                            53  * Parameters:
+00000020                            54  * D6: Upper limit (exclusive) of the number
+00000020                            55  
+00000020                            56  * Returns:
+00000020                            57  * D7: Randomized unsigned number
+00000020                            58  
+00000020                            59  * Other registers used: A3
+00000020                            60  
+00000020  4EB8 0000                 61      jsr     LAB_RND
+00000024  4287                      62      clr.l   d7
+00000026  3E2B 0040                 63      move.w  PRNlword(a3), d7        ; Random long in D7
+0000002A                            64      
+0000002A  8EC6                      65      divu    d6, d7
+0000002C  3E3C 0000                 66      move.w  #0, d7                  ; Clear the quotient
+00000030  4847                      67      swap    d7                      ; Get the remainder, which is the random number in the range
+00000032                            68          
+00000032  4E75                      69      rts
+00000034                            70      
+00000034                            71  * variables used
+00000034                            72  
+Line 73 ERROR: Symbol value differs between first and second pass
+00000034                            73  PRNlword    ds.l    1               * PRNG seed long word
+00000034                            74  
+00000034                            75  
+00000034                            76  
+00000034                            77  
+Line 78 WARNING: END directive missing, starting address not set
+
+6 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+LAB_RND             0
+NINC0               12
+NINC1               18
+PRNLWORD            40
+RANDOMRANGE         2C

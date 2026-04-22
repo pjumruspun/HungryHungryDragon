@@ -1,0 +1,869 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/13/2024 5:41:05 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Enemy AI
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 5/31/2024
+00000000                             5  * Description: Code related to enemy spawning or movement
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  initializeEnemies:
+00000000  4EB9 00000040              9      jsr     initializeEnemySpawnMechanics
+00000006  4EB9 0000002A             10      jsr     initializeEnemyProjMechanics
+0000000C  4EB9 00000014             11      jsr     initializeEnemyGroup
+00000012  4E75                      12      rts
+00000014                            13  
+00000014                            14  initializeEnemyGroup:
+00000014                            15  * Just need to set EnemySpawnedThisGroup to equal EnemyMaxThisGroup
+00000014                            16  * To trigger the next group spawn when we start the game
+Line 17 ERROR: Undefined symbol
+00000014  23FC 004DBD16 005455B8    17      move.l  #ENEMY_GROUP_SIZE_MAX, EnemyMaxThisGroup
+Line 18 ERROR: Undefined symbol
+0000001E  23FC 004DBD16 005455B8    18      move.l  #ENEMY_GROUP_SIZE_MAX, EnemySpawnedThisGroup
+00000028                            19  
+00000028  4E75                      20      rts
+0000002A                            21  
+0000002A                            22  initializeEnemyProjMechanics:
+0000002A                            23  * Call this initially to tell the game that no projectile is active
+0000002A                            24  * Registers used: D0, A1
+Line 25 ERROR: Undefined symbol
+0000002A  43F9 004DBD16             25      lea     IsEnemyProjectileActive, a1
+Line 26 ERROR: Comma expected
+00000030                            26      move.l  #MAX_ENEMY_PROJECTILE-1, d0
+00000030                            27      
+Line 28 ERROR: Symbol value differs between first and second pass
+00000030                            28  initEnemyProjLoop:
+Line 29 ERROR: Undefined symbol
+00000030  12FC 0016                 29      move.b  #ENEMY_PROJ_STATUS_INACTIVE, (a1)+
+00000034  51C8 0000                 30      dbra    d0, initEnemyProjLoop
+00000038  4E75                      31      rts
+0000003A                            32  
+Line 33 ERROR: Symbol value differs between first and second pass
+0000003A                            33  initializeEnemySpawnMechanics:
+0000003A  4EB9 0000004E             34      jsr     initializeIsEnemyAlive
+00000040  4EB9 00000064             35      jsr     initializeEnemySpawnTime
+00000046  4E75                      36      rts
+00000048                            37  
+Line 38 ERROR: Symbol value differs between first and second pass
+00000048                            38  initializeIsEnemyAlive:
+00000048                            39  * Set everything to dead initially
+00000048                            40  * Registers used: D0, D1, A1
+Line 41 ERROR: Comma expected
+00000048                            41      move.l  #MAX_ENEMY_ALLOWED-1, d0
+Line 42 ERROR: Undefined symbol
+00000048  43F9 004DBD16             42      lea     IsEnemyAlive, a1
+0000004E                            43      
+Line 44 ERROR: Symbol value differs between first and second pass
+0000004E                            44  initIsEnemyAliveLoop:
+Line 45 ERROR: Undefined symbol
+0000004E  12FC 0016                 45      move.b  #ENEMY_STATUS_DEAD, (a1)+
+00000052  51C8 0006                 46      dbra    d0, initIsEnemyAliveLoop
+00000056  4E75                      47      rts
+00000058                            48  
+Line 49 ERROR: Symbol value differs between first and second pass
+00000058                            49  initializeEnemySpawnTime:
+00000058                            50  * Call this at the begin of the main game loop to set the time that enemy should spawn
+00000058                            51  * Registers used: D1
+Line 52 ERROR: Undefined symbol
+00000058  4EB9 004DBD16             52      jsr     getTimeSinceMidnight        ; D1 contains time since midnight
+Line 53 ERROR: Undefined symbol
+0000005E  23C1 005455B8             53      move.l  d1, TimeSinceLastEnemySpawned
+00000064  4E75                      54      rts
+00000066                            55      
+Line 56 ERROR: Symbol value differs between first and second pass
+00000066                            56  initializeEnemyProjTimeCounter:
+00000066                            57  * Should call this when enemy spawns
+00000066                            58  * Set time since enemy last shooting
+00000066                            59  * Parameters:
+00000066                            60  * D0: Offset index of the enemy (****Already scaled by long offset****)
+00000066                            61  
+00000066                            62  * Other registers used: D1, A2
+Line 63 ERROR: Undefined symbol
+00000066  4EB9 004DBD16             63      jsr     getTimeSinceMidnight                ; D1 contains time since midnight
+Line 64 ERROR: Undefined symbol
+0000006C  45F9 004DBD16             64      lea     LastEnemyShootingTime, a2
+00000072  2581 0000                 65      move.l  d1, (a2, d0)                        ; Set the D0'th enemy's last shooting time to now
+00000076  4E75                      66      rts
+00000078                            67      
+Line 68 ERROR: Symbol value differs between first and second pass
+00000078                            68  enemyUpdate:
+00000078  4EB9 0000009E             69      jsr     attemptToSpawnEnemy
+0000007E  4EB9 000001BA             70      jsr     enemyMovementUpdate
+00000084  4EB9 00000282             71      jsr     enemyShootingUpdate
+0000008A  4EB9 00000376             72      jsr     enemyProjectilePositionUpdate
+00000090  4E75                      73      rts
+00000092                            74      
+Line 75 ERROR: Symbol value differs between first and second pass
+00000092                            75  attemptToSpawnEnemy:
+00000092                            76  * Check whether it's been X hundredth seconds since last spawned yet
+00000092                            77  * Registers used:   D0-D5, A1, A2 (initializeEnemyProjTimeCounter), 
+00000092                            78  *                   D6-D7, A3 (random function)
+00000092                            79  
+00000092                            80  * Check if we need to create a new group
+Line 81 ERROR: Undefined symbol
+00000092  2039 004DBD16             81      move.l  EnemySpawnedThisGroup, d0
+Line 82 ERROR: Undefined symbol
+00000098  2239 004DBD16             82      move.l  EnemyMaxThisGroup, d1
+0000009E  B081                      83      cmp.l   d1, d0
+000000A0  6D00 004A                 84      blt     skipNewGroup
+000000A4                            85      
+000000A4                            86  * Need to spawn a new group here
+Line 87 ERROR: Comma expected
+000000A4                            87      move.l  #ENEMY_GROUP_SIZE_MAX-ENEMY_GROUP_SIZE_MIN+1, d6
+Line 88 ERROR: Undefined symbol
+000000A4  4EB9 004DBD16             88      jsr     randomRange
+Line 89 ERROR: Undefined symbol
+000000AA  0687 004DBD16             89      add.l   #ENEMY_GROUP_SIZE_MIN, d7       ; D7 contains a random number from [ENEMY_GROUP_SIZE_MIN, ENEMY_GROUP_SIZE_MAX]
+000000B0                            90  
+Line 91 ERROR: Undefined symbol
+000000B0  23C7 005455C8             91      move.l  d7, EnemyMaxThisGroup           ; Set this group's size
+Line 92 ERROR: Undefined symbol
+000000B6  23FC 00000000 005455CC    92      move.l  #0, EnemySpawnedThisGroup       ; Reset the enemy count
+000000C0                            93      
+000000C0                            94  * Enemies in the same group spawns at the same random Y location
+Line 95 ERROR: Undefined symbol
+000000C0  2C3C 004DBD16             95      move.l  #ENEMY_MAX_SPAWN_Y, d6                  ; Random from [0, d6)
+Line 96 ERROR: Undefined symbol
+000000C6  4EB9 004DBD16             96      jsr     randomRange                             ; D7 contains random int in the range
+Line 97 ERROR: Undefined symbol
+000000CC  0687 004DBD16             97      add.l   #ENEMY_MIN_SPAWN_Y, d7
+Line 98 ERROR: Undefined symbol
+000000D2  ED8F                      98      lsl.l   #FRACTIONAL_BITS, d7                    ; To fixed point
+Line 99 ERROR: Undefined symbol
+000000D4  23C7 005455C8             99      move.l  d7, FEnemyGroupRandomY                  ; Save for later
+000000DA                           100  
+Line 101 ERROR: Symbol value differs between first and second pass
+000000DA                           101  skipNewGroup:
+Line 102 ERROR: Undefined symbol
+000000DA  2439 004DBD16            102      move.l  TimeSinceLastEnemySpawned, d2
+Line 103 ERROR: Undefined symbol
+000000E0  4EB9 004DBD16            103      jsr     getTimeSinceMidnight            ; D1 contains time since midnight
+000000E6  9282                     104      sub.l   d2, d1                          ; D1 contains hundredth seconds since last spawn
+Line 105 ERROR: Undefined symbol
+000000E8  2839 004DBD16            105      move.l  TimeToSpawnEnemy, d4
+000000EE                           106      
+Line 107 ERROR: Undefined symbol
+000000EE  0CB9 00000000 005455E0   107      cmp.l   #0, EnemySpawnedThisGroup       ; If new fresh group, delay the first spawn time
+000000F8  6E00 0018                108      bgt     skipMultiplyTimeBetweenGroup
+000000FC                           109      
+000000FC                           110  * Delay spawn time
+Line 111 ERROR: Undefined symbol
+000000FC  C8FC BD16                111      mulu    #ENEMY_TIME_MULT_BETWEEN_GROUP, d4
+00000100                           112      
+Line 113 ERROR: Symbol value differs between first and second pass
+00000100                           113  skipMultiplyTimeBetweenGroup:
+00000100  B284                     114      cmp.l   d4, d1
+00000102  6C00 0016                115      bge     checkAliveArraySpawnEnemy
+00000106  4E75                     116      rts
+00000108                           117      
+Line 118 ERROR: Symbol value differs between first and second pass
+00000108                           118  checkAliveArraySpawnEnemy:
+00000108                           119  * Increment enemy current group size counter
+Line 120 ERROR: Undefined symbol
+00000108  52B9 005455B8            120      add.l   #1, EnemySpawnedThisGroup
+0000010E                           121      
+0000010E                           122  * Loop through the alive array to see if it's okay to spawn
+0000010E  70FF                     123      move.l  #-1, d0                         ; Offset
+Line 124 ERROR: Undefined symbol
+00000110  43F9 004DBD16            124      lea     IsEnemyAlive, a1
+00000116                           125      
+Line 126 ERROR: Symbol value differs between first and second pass
+00000116                           126  checkAliveArraySpawnEnemyLoop:
+00000116                           127  * Should not ever loop back here after spawning an enemy
+00000116  5280                     128      add.l   #1, d0
+00000118                           129      
+Line 130 ERROR: Undefined symbol
+00000118  2839 004DBD16            130      move.l  MaxEnemy, d4
+0000011E  B084                     131      cmp.l   d4, d0          ; If no slot to spawn, skip spawning
+00000120  6C00 008A                132      bge     skipSpawn
+00000124                           133      
+Line 134 ERROR: Undefined symbol
+00000124  0C31 0016 0000           134      cmp.b   #ENEMY_STATUS_DEAD, (a1, d0)    
+0000012A  6700 0016                135      beq     spawnEnemy                      ; If found an empty slot to spawn, then spawn
+0000012E                           136      
+0000012E  60F8                     137      bra     checkAliveArraySpawnEnemyLoop
+00000130                           138      
+Line 139 ERROR: Symbol value differs between first and second pass
+00000130                           139  spawnEnemy:
+Line 140 ERROR: Undefined symbol
+00000130  13BC 0016 0000           140      move.b  #ENEMY_STATUS_ALIVE, (a1, d0)   ; Flag that this enemy is becoming alive
+00000136                           141      
+00000136                           142  * Set enemy type
+00000136  7C64                     143      move.l  #100, d6                        ; Random from hundred percent, 
+Line 144 ERROR: Undefined symbol
+00000138  4EB9 004DBD16            144      jsr     randomRange                     ; D7 contains a random number from 0-99
+0000013E                           145      
+Line 146 ERROR: Undefined symbol
+0000013E  43F9 004DBD16            146      lea     EnemySpawnRateArray, a1
+Line 147 ERROR: Comma expected
+00000144                           147      move.l  #ENEMY_TYPE_TOTAL-2, d5         ; -2 because we don't count normal enemy
+00000144                           148      
+00000144  7864                     149      move.l  #100, d4                        ; We will subtract from D4 to see if it's the right type of enemy to spawn
+00000146                           150      
+Line 151 ERROR: Symbol value differs between first and second pass
+00000146                           151  setEnemyTypeLoop:
+00000146  2C05                     152      move.l  d5, d6
+00000148  E58E                     153      lsl.l   #2, d6                          ; Long offset
+0000014A  98B1 6000                154      sub.l   (a1, d6), d4                    ; Subtract spawn rate percentage
+0000014E  BE84                     155      cmp.l   d4, d7                          ; See if value is within range
+00000150  6C00 001E                156      bge     setEnemyType
+00000154  51CD 0008                157      dbra    d5, setEnemyTypeLoop
+00000158                           158      
+Line 159 ERROR: Symbol value differs between first and second pass
+00000158                           159  setEnemyType:
+00000158                           160  * Right after this D5 should contain EnemyTypeEnum-1
+00000158  5285                     161      add.l   #1, d5                          ; Add 1 back
+0000015A                           162  
+Line 163 ERROR: Undefined symbol
+0000015A  43F9 004DBD16            163      lea     EnemyTypes, a1
+00000160  1385 0000                164      move.b  d5, (a1, d0)                    ; Set enemy's type
+00000164                           165      
+00000164  E588                     166      lsl.l   #2, d0                          ; Long offset
+00000166  4EB8 0072                167      jsr     initializeEnemyProjTimeCounter  ; Init some projectile mechanics
+0000016A                           168      
+0000016A                           169  * Set position
+Line 170 ERROR: Undefined symbol
+0000016A  43F9 004DBD16            170      lea     FEnemyPosX, a1
+Line 171 ERROR: Undefined symbol
+00000170  23BC 004DBD16 0000       171      move.l  #FDEFAULT_ENEMY_POS_X, (a1, d0) ; Set enemy's X position
+00000178                           172  
+Line 173 ERROR: Undefined symbol
+00000178  43F9 004DBD16            173      lea     FEnemyPosY, a1
+Line 174 ERROR: Undefined symbol
+0000017E  23B9 004DBD16 0000       174      move.l  FEnemyGroupRandomY, (a1, d0)    ; Set enemy's Y position
+00000186                           175      
+Line 176 ERROR: Undefined symbol
+00000186  43F9 004DBD16            176      lea     FEnemyStartPosY, a1
+Line 177 ERROR: Undefined symbol
+0000018C  23B9 004DBD16 0000       177      move.l  FEnemyGroupRandomY, (a1, d0)    ; Set enemy's initial Y position for sin wave movement
+00000194                           178  
+00000194                           179  
+Line 180 ERROR: Symbol value differs between first and second pass
+00000194                           180  skipSpawn:
+Line 181 ERROR: Undefined symbol
+00000194  4EB9 004DBD16            181      jsr     getTimeSinceMidnight            ; D1 contains time since midnight
+Line 182 ERROR: Undefined symbol
+0000019A  23C1 005455C4            182      move.l  d1, TimeSinceLastEnemySpawned   ; Reset timer
+000001A0                           183      
+000001A0  4E75                     184      rts
+000001A2                           185      
+Line 186 ERROR: Symbol value differs between first and second pass
+000001A2                           186  enemyMovementUpdate:
+000001A2                           187  * Loop through the alive array to see if it needs to be moved
+000001A2                           188  * Registers used: D0-D4, D6-D7 (Sin function), A1-A3
+000001A2  70FF                     189      move.l  #-1, d0                         ; Offset
+Line 190 ERROR: Undefined symbol
+000001A4  43F9 004DBD16            190      lea     IsEnemyAlive, a1
+000001AA                           191  
+Line 192 ERROR: Symbol value differs between first and second pass
+000001AA                           192  checkAliveArrayEnemyMovementLoop:
+000001AA  5280                     193      add.l   #1, d0
+000001AC                           194      
+Line 195 ERROR: Undefined symbol
+000001AC  B0BC 004DBD16            195      cmp.l   #MAX_ENEMY_ALLOWED, d0          ; If is at the end of the array, return
+000001B2  6C00 00CC                196      bge     skipMovement
+000001B6                           197      
+Line 198 ERROR: Undefined symbol
+000001B6  0C31 0016 0000           198      cmp.b   #ENEMY_STATUS_ALIVE, (a1, d0)   ; Check to see if we need to move an alive enemy
+000001BC  6700 001C                199      beq     moveEnemy
+000001C0                           200      
+000001C0  6000 0000                201      bra     checkAliveArrayEnemyMovementLoop
+000001C4                           202      
+Line 203 ERROR: Symbol value differs between first and second pass
+000001C4                           203  moveEnemy:
+000001C4                           204  * For horizontal movement, we simply move from right to left
+000001C4                           205  * For vertical movement, we move to its sin value corresponded to the horizontal position
+000001C4                           206  
+000001C4                           207  * Horizontal movement
+000001C4  2200                     208      move.l  d0, d1
+000001C6  E589                     209      lsl.l   #2, d1                          ; Long offset
+000001C8                           210      
+Line 211 ERROR: Undefined symbol
+000001C8  263C 004DBD16            211      move.l  #FENEMY_SPEED, d3
+000001CE                           212      
+000001CE                           213  * Multiply by difficulty speed modifier
+Line 214 ERROR: Undefined symbol
+000001CE  2839 004DBD16            214      move.l  DifficultyLevel, d4
+Line 215 ERROR: Undefined symbol
+000001D4  C9FC BD16                215      muls    #FENEMY_SPEED_DIFF_MULT, d4
+Line 216 ERROR: Undefined symbol
+000001D8  0684 004DBD16            216      add.l   #1<<FRACTIONAL_BITS, d4
+000001DE  C7C4                     217      muls    d4, d3
+Line 218 ERROR: Undefined symbol
+000001E0  EC8B                     218      lsr.l   #FRACTIONAL_BITS, d3
+000001E2                           219      
+000001E2                           220  * Add enemy speed if nimble
+Line 221 ERROR: Undefined symbol
+000001E2  45F9 004DBD16            221      lea     EnemyTypes, a2
+Line 222 ERROR: Undefined symbol
+000001E8  0C32 0016 0000           222      cmp.b   #ENEMY_TYPE_NIMBLE, (a2, d0)
+000001EE  6600 001E                223      bne     skipAddingNimbleEnemySpeed
+000001F2                           224      
+000001F2                           225  * Is nimble enemy, add speed here
+Line 226 ERROR: Undefined symbol
+000001F2  0683 004DBD16            226      add.l   #FENEMY_NIMBLE_SPEED_BONUS, d3
+000001F8                           227      
+Line 228 ERROR: Symbol value differs between first and second pass
+000001F8                           228  skipAddingNimbleEnemySpeed:
+Line 229 ERROR: Undefined symbol
+000001F8  EC8B                     229      lsr.l   #HALF_FRACTIONAL_BITS, d3
+Line 230 ERROR: Undefined symbol
+000001FA  2439 004DBD16            230      move.l  DeltaTime, d2                   ; Scale by DeltaTime
+Line 231 ERROR: Undefined symbol
+00000200  ED8A                     231      lsl.l   #HALF_FRACTIONAL_BITS, d2
+00000202  C7C2                     232      muls.w  d2, d3
+00000204                           233      
+Line 234 ERROR: Undefined symbol
+00000204  45F9 004DBD16            234      lea     FEnemyPosX, a2
+0000020A  97B2 1000                235      sub.l   d3, (a2, d1)                    ; Move the D1'th enemy to the left
+0000020E                           236      
+0000020E                           237  * Vertical movement
+0000020E                           238  * We have sin equation offset: y = Amplitude * Sin (x/period) + yShift
+0000020E                           239  * x = FEnemyPosX - FScreenWidth
+0000020E                           240  * yShift = FEnemyStartPosY
+0000020E                           241  
+0000020E                           242  * Calculate x for the sin function
+0000020E  2632 1000                243      move.l  (a2, d1), d3                    ; D3 contains FEnemyPosX
+Line 244 ERROR: Invalid syntax
+00000212                           244      sub.l   #WINDOW_WIDTH<<FRACTIONAL_BITS, d3
+00000212  4483                     245      neg.l   d3
+00000214                           246      
+Line 247 ERROR: Undefined symbol
+00000214  87FC BD16                247      divs    #ENEMY_SIN_PERIOD, d3
+00000218  4843                     248      swap    d3
+0000021A  363C 0000                249      move.w  #0, d3
+0000021E  4843                     250      swap    d3                              ; Divide by period
+00000220  48C3                     251      ext.l   d3                              ; Extend in case of negative    
+00000222                           252  
+00000222                           253  * Call sin function
+Line 254 ERROR: Undefined symbol
+00000222  23C3 005455B8            254      move.l  d3, FSinRadianParam
+Line 255 ERROR: Undefined symbol
+00000228  4EB9 004DBD16            255      jsr     SinRadian                       ; D6 contains sin value of the given D3 in radian
+0000022E                           256      
+Line 257 ERROR: Undefined symbol
+0000022E  CDFC BD16                257      muls    #ENEMY_SIN_AMP, d6              ; Multiply by amplitude to get the offset
+00000232                           258  
+00000232                           259  * Add the initial shift to get the actual Y position
+Line 260 ERROR: Undefined symbol
+00000232  45F9 004DBD16            260      lea     FEnemyStartPosY, a2
+00000238  2432 1000                261      move.l  (a2, d1), d2
+0000023C  DC82                     262      add.l   d2, d6
+0000023E                           263      
+0000023E                           264  * Set the Y position
+Line 265 ERROR: Undefined symbol
+0000023E  45F9 004DBD16            265      lea     FEnemyPosY, a2
+00000244  2586 1000                266      move.l  d6, (a2, d1)
+00000248                           267      
+00000248                           268  * Check if the enemy is offscreen
+Line 269 ERROR: Undefined symbol
+00000248  45F9 004DBD16            269      lea     FEnemyPosX, a2
+Line 270 ERROR: Invalid syntax
+0000024E                           270      cmp.l   #-ENEMY_SIZE_X<<FRACTIONAL_BITS, (a2, d1)
+0000024E  6C00 002C                271      bge     skipKillingOffscreenEnemy
+00000252                           272      
+00000252                           273  * Kill offscreen enemies
+Line 274 ERROR: Undefined symbol
+00000252  13BC 0016 0000           274      move.b  #ENEMY_STATUS_DEAD, (a1, d0)
+00000258                           275   
+Line 276 ERROR: Symbol value differs between first and second pass
+00000258                           276  skipKillingOffscreenEnemy:  
+00000258                           277  * Branch back to see if there's any other enemies that needs to be moved
+00000258  6000 FF68                278      bra     checkAliveArrayEnemyMovementLoop
+0000025C                           279  
+Line 280 ERROR: Symbol value differs between first and second pass
+0000025C                           280  skipMovement:
+0000025C  4E75                     281      rts
+0000025E                           282  
+Line 283 ERROR: Symbol value differs between first and second pass
+0000025E                           283  enemyShootingUpdate:
+0000025E                           284  * Loop through enemies, if they're alive, check if it's been enough time since they last shot
+0000025E                           285  * If it is, then set an enemy projectile to active
+0000025E                           286  
+0000025E                           287  * NOTE: This function uses multiple contexts as it has unusual nested loops
+0000025E                           288  * Becareful when using registers and make sure it has the right value for its context
+0000025E                           289  
+0000025E                           290  * Registers used: EVERY REGISTER
+0000025E                           291  
+Line 292 ERROR: Undefined symbol
+0000025E  43F9 004DBD16            292      lea     IsEnemyAlive, a1
+Line 293 ERROR: Comma expected
+00000264                           293      move.l  #MAX_ENEMY_ALLOWED-1, d0
+00000264                           294      
+Line 295 ERROR: Symbol value differs between first and second pass
+00000264                           295  enemyAttemptShootingLoop:
+00000264  2400                     296      move.l  d0, d2
+Line 297 ERROR: Comma expected
+00000266                           297      sub.l   #MAX_ENEMY_ALLOWED-1, d2
+00000266  4482                     298      neg.l   d2                              ; D2 is the true index
+00000268                           299      
+Line 300 ERROR: Undefined symbol
+00000268  0C19 0016                300      cmp.b   #ENEMY_STATUS_ALIVE, (a1)+
+0000026C  6600 0102                301      bne     skipSetEnemyProjectileActive
+00000270                           302      
+00000270                           303  * If we reach here, then enemy is alive. See if it's been enough time since it last shot.
+00000270  2602                     304      move.l  d2, d3
+00000272  E58B                     305      lsl.l   #2, d3                                  ; Long offset
+Line 306 ERROR: Undefined symbol
+00000274  4DF9 004DBD16            306      lea     LastEnemyShootingTime, a6
+0000027A  2836 3000                307      move.l  (a6, d3), d4                            ; D4 contains time since last enemy shot
+Line 308 ERROR: Undefined symbol
+0000027E  4EB9 004DBD16            308      jsr     getTimeSinceMidnight                    ; D1 contains time now
+00000284  9284                     309      sub.l   d4, d1                                  ; Time between last shot and now
+00000286                           310  
+00000286                           311  * Get generic enemy shooting time
+Line 312 ERROR: Undefined symbol
+00000286  2839 004DBD16            312      move.l  EnemyShootingTime, d4
+0000028C                           313  
+0000028C                           314  * Check if it's a fierce enemy which has different attack cooldown
+Line 315 ERROR: Undefined symbol
+0000028C  4DF9 004DBD16            315      lea     EnemyTypes, a6
+Line 316 ERROR: Undefined symbol
+00000292  0C36 0016 2000           316      cmp.b   #ENEMY_TYPE_FIERCE, (a6, d2)
+00000298  6600 0038                317      bne     skipFierceEnemyShooting
+0000029C                           318  
+0000029C                           319  * Fierce enemy, multiply by the fierce enemy ratio constant
+Line 320 ERROR: Undefined symbol
+0000029C  C8FC BD16                320      mulu    #FFIERCE_ENEMY_SHOOTING_RATIO, d4
+Line 321 ERROR: Undefined symbol
+000002A0  EC8C                     321      lsr.l   #FRACTIONAL_BITS, d4                    ; To integer
+000002A2                           322  
+Line 323 ERROR: Symbol value differs between first and second pass
+000002A2                           323  skipFierceEnemyShooting:
+000002A2                           324  * Add some variance here
+Line 325 ERROR: Undefined symbol
+000002A2  2C3C 004DBD16            325      move.l  #ENEMY_SHOOTING_TIME_VARIANCE, d6
+Line 326 ERROR: Undefined symbol
+000002A8  4EB9 004DBD16            326      jsr     randomRange                             ; D7 contains a random number in range of [0, d6)
+Line 327 ERROR: Invalid syntax
+000002AE                           327      sub.l   #ENEMY_SHOOTING_TIME_VARIANCE>>1, d7
+000002AE  D887                     328      add.l   d7, d4
+000002B0                           329      
+000002B0                           330  * Compare here
+000002B0  B284                     331      cmp.l   d4, d1
+000002B2  6D00 00BC                332      blt     skipSetEnemyProjectileActive            ; Skip if not enough time has passed
+000002B6                           333  
+000002B6                           334  * It's been enough time since last time this enemy has shot, so it will shoot again here.
+000002B6                           335  * Play sound
+Line 336 ERROR: Undefined symbol
+000002B6  4EB9 004DBD16            336      jsr     playEnemyShootingSound
+000002BC                           337  
+Line 338 ERROR: Invalid syntax
+000002BC                           338      sub.l   #LONG_OFFSET*15, sp
+Line 339 ERROR: Undefined symbol
+000002BC                           339      movem.l ALL_REG, (sp)                           ; Save context
+000002BC                           340  
+000002BC                           341  ***** START OF THE ENEMY PROJECTILE CONTEXT *****
+000002BC                           342  * Loop to find the first inactive projectile
+Line 343 ERROR: Comma expected
+000002BC                           343      move.l  #MAX_ENEMY_PROJECTILE-1, d0
+Line 344 ERROR: Undefined symbol
+000002BC  45F9 004DBD16            344      lea     IsEnemyProjectileActive, a2
+000002C2                           345      
+000002C2  2C02                     346      move.l  d2, d6                                  ; Enemy index, will use this to get enemy's pos
+000002C4                           347      
+Line 348 ERROR: Symbol value differs between first and second pass
+000002C4                           348  findEnemyInactiveProjLoop:
+Line 349 ERROR: Undefined symbol
+000002C4  0C1A 0016                349      cmp.b   #ENEMY_PROJ_STATUS_INACTIVE, (a2)+
+000002C8  6700 0052                350      beq     setEnemyProjActive
+000002CC                           351      
+000002CC  51C8 0038                352      dbra    d0, findEnemyInactiveProjLoop
+000002D0                           353      
+000002D0                           354  * Run of out projectile array to spawn
+000002D0                           355  
+Line 356 ERROR: Undefined symbol
+000002D0                           356      movem.l (sp), ALL_REG
+Line 357 ERROR: Invalid syntax
+000002D0                           357      add.l   #LONG_OFFSET*15, sp                     ; Load context
+000002D0                           358      
+000002D0  6000 009E                359      bra     skipSetEnemyProjectileActive            ; Exceed the projectile limit
+000002D4                           360      
+Line 361 ERROR: Symbol value differs between first and second pass
+000002D4                           361  setEnemyProjActive:
+000002D4  2400                     362      move.l  d0, d2
+Line 363 ERROR: Comma expected
+000002D6                           363      sub.l   #MAX_ENEMY_PROJECTILE-1, d2
+000002D6  4482                     364      neg.l   d2                                      ; D2 contains enemy projectile index
+000002D8                           365      
+Line 366 ERROR: Undefined symbol
+000002D8  157C 0016 FFFF           366      move.b  #ENEMY_PROJ_STATUS_ACTIVE, -1(a2)       ; Sets the first inactive projectile to active
+000002DE                           367  
+000002DE                           368  * Set the initial position to enemy's position for now
+000002DE  2602                     369      move.l  d2, d3
+000002E0  E58B                     370      lsl.l   #2, d3                                  ; Long offset * Proj index
+000002E2  2406                     371      move.l  d6, d2                                  ; Enemy index from earlier
+000002E4                           372      
+000002E4  4EB9 0000053E            373      jsr     getEnemyPosition                        ; D2 from above is used and mutated
+000002EA                           374                                                      ; D6 and D7 contains positions
+000002EA                           375      
+Line 376 ERROR: Undefined symbol
+000002EA  49F9 004DBD16            376      lea     FEnemyProjectileX, a4                                            
+000002F0  2986 3000                377      move.l  d6, (a4, d3)                            ; Set FEnemyProjectileX
+000002F4                           378      
+Line 379 ERROR: Undefined symbol
+000002F4  49F9 004DBD16            379      lea     FEnemyProjectileY, a4
+000002FA  2987 3000                380      move.l  d7, (a4, d3)                            ; Set FEnemyProjectileY
+000002FE                           381  
+Line 382 ERROR: Undefined symbol
+000002FE  49F9 004DBD16            382      lea     FEnemyProjectileVY, a4
+Line 383 ERROR: Undefined symbol
+00000304  29BC 004DBD16 3000       383      move.l  #-FENEMY_INIT_PROJECTILE_SPEED_Y, (a4, d3)  ; Set initial speed
+0000030C                           384                                                          ; Negative because physics and screen
+0000030C                           385                                                          ; Y-axis are flipped
+0000030C                           386  
+0000030C                           387  ***** END OF THE ENEMY PROJECTILE CONTEXT *****  
+0000030C                           388    
+Line 389 ERROR: Undefined symbol
+0000030C                           389      movem.l (sp), ALL_REG
+Line 390 ERROR: Invalid syntax
+0000030C                           390      add.l   #LONG_OFFSET*15, sp                     ; Load context
+0000030C                           391  
+Line 392 ERROR: Undefined symbol
+0000030C  4EB9 004DBD16            392      jsr     getTimeSinceMidnight
+Line 393 ERROR: Undefined symbol
+00000312  4DF9 004DBD16            393      lea     LastEnemyShootingTime, a6
+00000318  2D81 3000                394      move.l  d1, (a6, d3)                            ; Mark the time that this enemy just shot
+0000031C                           395      
+Line 396 ERROR: Symbol value differs between first and second pass
+0000031C                           396  skipSetEnemyProjectileActive:
+0000031C  51C8 FF70                397      dbra    d0, enemyAttemptShootingLoop
+00000320                           398  
+00000320  4E75                     399      rts
+00000322                           400  
+Line 401 ERROR: Symbol value differs between first and second pass
+00000322                           401  enemyProjectilePositionUpdate:
+00000322                           402  * Registers used: D0-D7, A1-A2
+Line 403 ERROR: Comma expected
+00000322                           403      move.l  #MAX_ENEMY_PROJECTILE-1, d0
+Line 404 ERROR: Undefined symbol
+00000322  43F9 004DBD16            404      lea     IsEnemyProjectileActive, a1
+00000328                           405  
+00000328                           406      
+Line 407 ERROR: Symbol value differs between first and second pass
+00000328                           407  enemyProjPositionUpdateLoop:
+00000328                           408  * Check if the projectile is active, if it is, then move it
+Line 409 ERROR: Undefined symbol
+00000328  0C19 0016                409      cmp.b   #ENEMY_PROJ_STATUS_ACTIVE, (a1)+
+0000032C  6600 00FC                410      bne     continueMovingEnemyProjLoop
+00000330                           411      
+00000330                           412  * Update FEnemyProjectileX
+00000330  2200                     413      move.l  d0, d1
+Line 414 ERROR: Comma expected
+00000332                           414      sub.l   #MAX_ENEMY_PROJECTILE-1, d1
+00000332  4481                     415      neg.l   d1                                      ; D1 contains true projectile index
+00000334  E589                     416      lsl.l   #2, d1                                  ; Long offset
+00000336                           417  
+Line 418 ERROR: Undefined symbol
+00000336  45F9 004DBD16            418      lea     FEnemyProjectileX, a2
+0000033C                           419      
+Line 420 ERROR: Invalid syntax
+0000033C                           420      move.l  #FENEMY_PROJECTILE_SPEED_X>>HALF_FRACTIONAL_BITS, d2  ; Preshifting for mult
+Line 421 ERROR: Undefined symbol
+0000033C  2639 004DBD16            421      move.l  DeltaTime, d3
+Line 422 ERROR: Undefined symbol
+00000342  ED8B                     422      lsl.l   #HALF_FRACTIONAL_BITS, d3               ; To fixed point and preshifting
+00000344  C7C2                     423      muls.w  d2, d3
+00000346                           424      
+00000346  97B2 1000                425      sub.l   d3, (a2, d1)
+0000034A                           426      
+0000034A                           427  * Update FEnemyProjectileY
+0000034A                           428  * First, update the position based on current position, velocity, and acceleration
+Line 429 ERROR: Undefined symbol
+0000034A  45F9 004DBD16            429      lea     FEnemyProjectileY, a2
+00000350  2832 1000                430      move.l  (a2, d1), d4                            ; Current Y position
+Line 431 ERROR: Undefined symbol
+00000354  45F9 004DBD16            431      lea     FEnemyProjectileVY, a2
+0000035A  2A32 1000                432      move.l  (a2, d1), d5                            ; Current Y velocity
+Line 433 ERROR: Undefined symbol
+0000035E  2C3C 004DBD16            433      move.l  #FGRAVITY_ACCELERATION, d6              ; Constant gravity
+00000364                           434      
+Line 435 ERROR: Undefined symbol
+00000364  4EB9 004DBD16            435      jsr     calculateNextPosition                   ; D4 contains next Y position
+0000036A                           436      
+Line 437 ERROR: Undefined symbol
+0000036A  45F9 004DBD16            437      lea     FEnemyProjectileY, a2
+00000370  2584 1000                438      move.l  d4, (a2, d1)                            ; Save the new position
+00000374                           439  
+00000374                           440  * Then update the velocity
+Line 441 ERROR: Undefined symbol
+00000374  45F9 004DBD16            441      lea     FEnemyProjectileVY, a2
+0000037A  2A32 1000                442      move.l  (a2, d1), d5                            ; Current Y velocity
+Line 443 ERROR: Undefined symbol
+0000037E  2C3C 004DBD16            443      move.l  #FGRAVITY_ACCELERATION, d6              ; Constant gravity
+00000384                           444      
+Line 445 ERROR: Undefined symbol
+00000384  4EB9 004DBD16            445      jsr     calculateNextVelocity                   
+Line 446 ERROR: Undefined symbol
+0000038A  45F9 004DBD16            446      lea     FEnemyProjectileVY, a2
+00000390  2585 1000                447      move.l  d5, (a2, d1)                            ; Save the new velocity
+00000394                           448      
+00000394                           449  * Check whether we have to kill the projectiles that are offscreen
+00000394                           450  * checkEnemyProjOffscreenX:
+Line 451 ERROR: Undefined symbol
+00000394  45F9 004DBD16            451      lea     FEnemyProjectileX, a2
+0000039A  0CB2 00000000 1000       452      cmp.l   #0, (a2, d1)
+000003A2  6E00 006E                453      bgt     checkEnemyProjOffscreenY
+000003A6                           454      
+000003A6                           455  * Kill the projectile here for X offscreen
+Line 456 ERROR: Undefined symbol
+000003A6  137C 0016 FFFF           456      move.b  #ENEMY_PROJ_STATUS_INACTIVE, -1(a1)
+000003AC                           457      
+Line 458 ERROR: Symbol value differs between first and second pass
+000003AC                           458  checkEnemyProjOffscreenY:
+Line 459 ERROR: Undefined symbol
+000003AC  45F9 004DBD16            459      lea     FEnemyProjectileY, a2
+Line 460 ERROR: Invalid syntax
+000003B2                           460      cmp.l   #WINDOW_HEIGHT<<FRACTIONAL_BITS, (a2, d1)
+000003B2  6D00 0076                461      blt     continueMovingEnemyProjLoop
+000003B6                           462      
+000003B6                           463  * Kill the projectile here for Y offscreen
+Line 464 ERROR: Undefined symbol
+000003B6  137C 0016 FFFF           464      move.b  #ENEMY_PROJ_STATUS_INACTIVE, -1(a1)
+000003BC                           465  
+Line 466 ERROR: Symbol value differs between first and second pass
+000003BC                           466  continueMovingEnemyProjLoop:
+000003BC  51C8 FFC4                467      dbra    d0, enemyProjPositionUpdateLoop
+000003C0  4E75                     468      rts
+000003C2                           469      
+Line 470 ERROR: Symbol value differs between first and second pass
+000003C2                           470  onEnemyHit:
+000003C2                           471  * Should call this when enemy is hit with a player's projectile in collision code
+000003C2                           472  * Parameters:
+000003C2                           473  * D0: DBRA enemy loop counter (used for calculating enemy index)
+000003C2                           474  * A1: IsEnemyAlive pointer (after incremented in the collision loop)
+000003C2                           475  * A2: IsProjectileActive pointer (after incremented in the collision loop)
+000003C2                           476  
+000003C2                           477  * Other registers used: A3
+000003C2                           478  
+000003C2                           479  * Play sound
+Line 480 ERROR: Undefined symbol
+000003C2  4EB9 004DBD16            480      jsr     playEnemyDeathSound
+000003C8                           481  
+000003C8                           482  * Destroy both enemy and projectile
+Line 483 ERROR: Undefined symbol
+000003C8  137C 0016 FFFF           483      move.b  #ENEMY_STATUS_DEAD, -1(a1)                  ; Since we post incremental we need to offset back
+Line 484 ERROR: Undefined symbol
+000003CE  157C 0016 FFFF           484      move.b  #PLAYER_PROJ_STATUS_INACTIVE, -1(a2)
+000003D4                           485      
+000003D4                           486  * Get the enemy type enum
+000003D4  2400                     487      move.l  d0, d2
+Line 488 ERROR: Comma expected
+000003D6                           488      sub.l   #MAX_ENEMY_ALLOWED-1, d2                
+000003D6  4482                     489      neg.l   d2                                          ; Recalculate enemy's index just to be safe
+000003D8                           490      
+Line 491 ERROR: Undefined symbol
+000003D8  47F9 004DBD16            491      lea     EnemyTypes, a3
+000003DE  4284                     492      clr.l   d4
+000003E0  1833 2000                493      move.b  (a3, d2), d4                                ; D4 contains enemy type enum
+000003E4  E58C                     494      lsl.l   #2, d4                                      ; Long offset
+000003E6                           495      
+000003E6                           496  * Update the score here
+Line 497 ERROR: Undefined symbol
+000003E6  47F9 004DBD16            497      lea     EnemyScoreBounty, a3
+000003EC  2A33 4000                498      move.l  (a3, d4), d5
+Line 499 ERROR: Undefined symbol
+000003F0  DBB9 005455B8            499      add.l   d5, PlayerScore
+000003F6                           500      
+000003F6                           501  * Spawn score floating text
+000003F6  4EB9 0000053E            502      jsr     getEnemyPosition                            ; Takes true enemy index D2, output D6, D7 = FEnemyX, FEnemyY
+000003FC                           503      
+000003FC                           504  * Set color and properties
+Line 505 ERROR: Undefined symbol
+000003FC  23FC 004DBD16 005455B8   505      move.l  #SCORE_FLOATING_TEXT_COLOR, FloatingTextColorArg
+Line 506 ERROR: Undefined symbol
+00000406  23FC 004DBD16 005455B8   506      move.l  #SCORE_FLOATING_TEXT_PROPS, FloatingTextPropsArg
+00000410                           507      
+Line 508 ERROR: Invalid syntax
+00000410                           508      sub.l   #LONG_OFFSET*8, sp
+00000410  48D7 0E1F                509      movem.l d0-d4/a1-a3, (sp)
+00000414                           510  
+00000414                           511  * Set String address
+00000414                           512  * Quick and dirty method for now
+Line 513 ERROR: Undefined symbol
+00000414  43F9 004DBD16            513      lea     StrEnemyScoreBountyArr, a1
+0000041A  2271 4000                514      move.l  (a1, d4), a1
+0000041E                           515      
+0000041E                           516  * Set position
+0000041E  2206                     517      move.l  d6, d1
+00000420  2407                     518      move.l  d7, d2
+00000422                           519      
+00000422                           520  * Set TTL
+Line 521 ERROR: Undefined symbol
+00000422  203C 004DBD16            521      move.l  #SCORE_FLOATING_TEXT_TTL, d0
+00000428                           522      
+Line 523 ERROR: Undefined symbol
+00000428  4EB9 004DBD16            523      jsr     spawnFloatingText
+0000042E                           524      
+0000042E  4CD7 0E1F                525      movem.l (sp), d0-d4/a1-a3
+Line 526 ERROR: Invalid syntax
+00000432                           526      add.l   #LONG_OFFSET*8, sp
+00000432                           527  
+00000432                           528  * D0-D7, A1 is being used in drawScore subroutine
+00000432                           529  * A2 might be excessive and not needed to be saved
+Line 530 ERROR: Invalid syntax
+00000432                           530      sub.l   #LONG_OFFSET*11, sp
+00000432  48D7 0EFF                531      movem.l d0-d7/a1-a3, (sp)                           ; Save context
+00000436                           532      
+Line 533 ERROR: Undefined symbol
+00000436  4EB9 004DBD16            533      jsr     drawScore
+0000043C                           534      
+0000043C  4CD7 0EFF                535      movem.l (sp), d0-d7/a1-a3
+Line 536 ERROR: Invalid syntax
+00000440                           536      add.l   #LONG_OFFSET*11, sp                         ; Load context
+00000440                           537  
+00000440                           538  * Set the type of power-up to spawn
+00000440                           539  * D4 contains enemy type enum
+00000440  E48C                     540      lsr.l   #2, d4                                      ; Revert long offset
+00000442                           541  
+Line 542 ERROR: Undefined symbol
+00000442  B83C 0016                542      cmp.b   #ENEMY_TYPE_NIMBLE, d4
+00000446  6700 00AA                543      beq     setPowerUpSpawnMoveSpeed
+0000044A                           544      
+Line 545 ERROR: Undefined symbol
+0000044A  B83C 0016                545      cmp.b   #ENEMY_TYPE_FIERCE, d4
+0000044E  6700 00AE                546      beq     setPowerUpSpawnAtkSpeed
+00000452                           547      
+Line 548 ERROR: Undefined symbol
+00000452  B83C 0016                548      cmp.b   #ENEMY_TYPE_SPECIAL, d4
+00000456  6700 00B2                549      beq     setPowerUpSpawnSpread
+0000045A                           550      
+0000045A                           551  * Other kinds of enemy died
+0000045A                           552  * Set to spawn fuel power-up for now
+Line 553 ERROR: Undefined symbol
+0000045A  13FC 0016 005455B8       553      move.b  #POWERUP_TYPE_FUEL, PowerUpTypeToSpawn
+00000462  6000 00B2                554      bra     onEnemyDeadSpawnPowerUp
+00000466                           555      
+Line 556 ERROR: Symbol value differs between first and second pass
+00000466                           556  setPowerUpSpawnMoveSpeed:
+Line 557 ERROR: Undefined symbol
+00000466  13FC 0016 005455B8       557      move.b  #POWERUP_TYPE_MOVE_SPEED, PowerUpTypeToSpawn
+0000046E  6000 00A6                558      bra     onEnemyDeadSpawnPowerUp
+Line 559 ERROR: Symbol value differs between first and second pass
+00000472                           559  setPowerUpSpawnAtkSpeed:
+Line 560 ERROR: Undefined symbol
+00000472  13FC 0016 005455B8       560      move.b  #POWERUP_TYPE_ATK_SPEED, PowerUpTypeToSpawn
+0000047A  6000 009A                561      bra     onEnemyDeadSpawnPowerUp
+Line 562 ERROR: Symbol value differs between first and second pass
+0000047E                           562  setPowerUpSpawnSpread:
+Line 563 ERROR: Undefined symbol
+0000047E  13FC 0016 005455B8       563      move.b  #POWERUP_TYPE_SPREAD, PowerUpTypeToSpawn
+00000486  6000 008E                564      bra     onEnemyDeadSpawnPowerUp
+0000048A                           565      
+Line 566 ERROR: Symbol value differs between first and second pass
+0000048A                           566  onEnemyDeadSpawnPowerUp:
+0000048A                           567  * Spawning powerup uses D0-D1, D6-D7, A1-A3, but we'll save all data register for easy-to-read code
+Line 568 ERROR: Invalid syntax
+0000048A                           568      sub.l   #LONG_OFFSET*11, sp
+0000048A  48D7 0EFF                569      movem.l d0-d7/a1-a3, (sp)
+0000048E                           570      
+0000048E                           571  * Passing spawn power-up position parameters in heap
+Line 572 ERROR: Undefined symbol
+0000048E  23C6 005455CC            572      move.l  d6, FLastEnemyDeadX                         ; From getEnemyPosition jsr above
+Line 573 ERROR: Undefined symbol
+00000494  23C7 005455B8            573      move.l  d7, FLastEnemyDeadY
+0000049A                           574      
+Line 575 ERROR: Undefined symbol
+0000049A  4EB9 004DBD16            575      jsr     attemptToSpawnPowerUp
+000004A0                           576      
+000004A0  4CD7 0EFF                577      movem.l (sp), d0-d7/a1-a3
+Line 578 ERROR: Invalid syntax
+000004A4                           578      add.l   #LONG_OFFSET*11, sp
+000004A4                           579      
+000004A4  4E75                     580      rts
+000004A6                           581  
+Line 582 ERROR: Symbol value differs between first and second pass
+000004A6                           582  getEnemyPosition:
+000004A6                           583  * Parameters:
+000004A6                           584  * D2: Index of the enemy (make sure that it is alive!) 
+000004A6                           585      
+000004A6                           586  * Returns:
+000004A6                           587  * D6: FPositionX of the enemy
+000004A6                           588  * D7: FPositionY of the enemy
+000004A6                           589  
+000004A6                           590  * Other registers used: A3
+000004A6  E58A                     591      lsl.l   #2, d2                          ; Long offset
+000004A8                           592      
+Line 593 ERROR: Undefined symbol
+000004A8  47F9 004DBD16            593      lea     FEnemyPosX, a3
+000004AE  2C33 2000                594      move.l  (a3, d2), d6
+000004B2                           595      
+Line 596 ERROR: Undefined symbol
+000004B2  47F9 004DBD16            596      lea     FEnemyPosY, a3
+000004B8  2E33 2000                597      move.l  (a3, d2), d7
+000004BC                           598      
+000004BC  4E75                     599      rts
+000004BE                           600  
+000004BE                           601      
+000004BE                           602  
+000004BE                           603  
+000004BE                           604  
+000004BE                           605  
+000004BE                           606  
+000004BE                           607  
+000004BE                           608  
+000004BE                           609  
+000004BE                           610  
+000004BE                           611  
+000004BE                           612  
+000004BE                           613  
+000004BE                           614  
+000004BE                           615  
+000004BE                           616  
+000004BE                           617  
+000004BE                           618  
+000004BE                           619  
+000004BE                           620  
+000004BE                           621  
+Line 622 WARNING: END directive missing, starting address not set
+
+194 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ATTEMPTTOSPAWNENEMY  9E
+CHECKALIVEARRAYENEMYMOVEMENTLOOP  1C2
+CHECKALIVEARRAYSPAWNENEMY  11A
+CHECKALIVEARRAYSPAWNENEMYLOOP  128
+CHECKENEMYPROJOFFSCREENY  412
+CONTINUEMOVINGENEMYPROJLOOP  42A
+ENEMYATTEMPTSHOOTINGLOOP  28E
+ENEMYMOVEMENTUPDATE  1BA
+ENEMYPROJECTILEPOSITIONUPDATE  376
+ENEMYPROJPOSITIONUPDATELOOP  382
+ENEMYSHOOTINGUPDATE  282
+ENEMYUPDATE         84
+FINDENEMYINACTIVEPROJLOOP  306
+GETENEMYPOSITION    53E
+INITENEMYPROJLOOP   36
+INITIALIZEENEMIES   0
+INITIALIZEENEMYGROUP  14
+INITIALIZEENEMYPROJMECHANICS  2A
+INITIALIZEENEMYPROJTIMECOUNTER  72
+INITIALIZEENEMYSPAWNMECHANICS  40
+INITIALIZEENEMYSPAWNTIME  64
+INITIALIZEISENEMYALIVE  4E
+INITISENEMYALIVELOOP  5A
+MOVEENEMY           1DA
+ONENEMYDEADSPAWNPOWERUP  516
+ONENEMYHIT          430
+SETENEMYPROJACTIVE  31C
+SETENEMYTYPE        170
+SETENEMYTYPELOOP    15E
+SETPOWERUPSPAWNATKSPEED  4FE
+SETPOWERUPSPAWNMOVESPEED  4F2
+SETPOWERUPSPAWNSPREAD  50A
+SKIPADDINGNIMBLEENEMYSPEED  20E
+SKIPFIERCEENEMYSHOOTING  2D2
+SKIPKILLINGOFFSCREENENEMY  27C
+SKIPMOVEMENT        280
+SKIPMULTIPLYTIMEBETWEENGROUP  112
+SKIPNEWGROUP        EC
+SKIPSETENEMYPROJECTILEACTIVE  370
+SKIPSPAWN           1AC
+SPAWNENEMY          142

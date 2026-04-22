@@ -1,0 +1,190 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/11/2024 1:27:22 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Floating Text
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/11/2024
+00000000                             5  * Description: Floating text for UI purposes
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  initFloatingText:
+00000000                             9  * Set all IsFloatingTextActive to inactive
+00000000                            10  * Registers used: D0, A1
+Line 11 ERROR: Comma expected
+00000000                            11      move.l  #MAX_FLOATING_TEXT-1, d0
+Line 12 ERROR: Undefined symbol
+00000000  43F9 004DBD16             12      lea     IsFloatingTextActive, a1
+00000006                            13      
+Line 14 ERROR: Symbol value differs between first and second pass
+00000006                            14  initFloatingTextLoop:
+Line 15 ERROR: Undefined symbol
+00000006  12FC 0016                 15      move.b  #FLOATING_TEXT_STATUS_INACTIVE, (a1)+
+0000000A  51C8 0000                 16      dbra    d0, initFloatingTextLoop
+0000000E                            17      
+0000000E  4E75                      18      rts
+00000010                            19      
+Line 20 ERROR: Symbol value differs between first and second pass
+00000010                            20  spawnMoveSpeedFloatingText:
+00000010                            21  * Call this when the player collects movement speed power-up
+00000010                            22  * Parameters: 
+00000010                            23  * D1: FloatingText's FLeftX
+00000010                            24  * D2: FloatingText's FUpperY
+00000010                            25  
+00000010                            26  * Save context for this function and spawnFloatingText
+Line 27 ERROR: Invalid syntax
+00000010                            27      sub.l   #LONG_OFFSET*8, sp
+00000010  48D7 0E1F                 28      movem.l d0-d4/a1-a3, (sp)
+00000014                            29      
+00000014                            30  * Spawn it
+Line 31 ERROR: Undefined symbol
+00000014  43F9 004DBD16             31      lea     StrMoveSpeedPowerUp, a1
+Line 32 ERROR: Undefined symbol
+0000001A  203C 004DBD16             32      move.l  #FLOATING_TEXT_POWERUP_TTL, d0
+00000020  4EB9 0000003E             33      jsr     spawnFloatingText
+00000026                            34      
+00000026                            35  * Load context
+00000026  4CD7 0E1F                 36      movem.l (sp), d0-d4/a1-a3
+Line 37 ERROR: Invalid syntax
+0000002A                            37      add.l   #LONG_OFFSET*8, sp
+0000002A  4E75                      38      rts
+0000002C                            39      
+Line 40 ERROR: Symbol value differs between first and second pass
+0000002C                            40  spawnFloatingText:
+0000002C                            41  * Spawn floating text with null-terminated string at A1 for D0 time unit
+0000002C                            42  * Parameters:
+0000002C                            43  * A1: String Address
+0000002C                            44  * D0: Time to live in hundredth seconds
+0000002C                            45  * D1: FloatingText's FLeftX
+0000002C                            46  * D2: FloatingText's FUpperY
+0000002C                            47  
+0000002C                            48  * Other registers used: D1-D4, A2-A3
+0000002C                            49  
+0000002C                            50  * Loop through IsFloatingTextActive and find the first inactive one
+Line 51 ERROR: Comma expected
+0000002C                            51      move.l  #MAX_FLOATING_TEXT-1, d3
+Line 52 ERROR: Undefined symbol
+0000002C  45F9 004DBD16             52      lea     IsFloatingTextActive, a2
+00000032                            53      
+Line 54 ERROR: Symbol value differs between first and second pass
+00000032                            54  spawnFloatingTextLoop:
+Line 55 ERROR: Undefined symbol
+00000032  0C1A 0016                 55      cmp.b   #FLOATING_TEXT_STATUS_INACTIVE, (a2)+
+00000036  6600 0064                 56      bne     continueSpawnFloatingText
+0000003A                            57  
+0000003A                            58  * Found inactive FloatingText, set it to active
+Line 59 ERROR: Undefined symbol
+0000003A  157C 0016 FFFF            59      move.b  #FLOATING_TEXT_STATUS_ACTIVE, -1(a2)
+00000040                            60  
+00000040                            61  * Get the long-offset index
+00000040  2803                      62      move.l  d3, d4
+Line 63 ERROR: Comma expected
+00000042                            63      sub.l   #MAX_FLOATING_TEXT-1, d2
+00000042  4482                      64      neg.l   d2
+00000044  E58C                      65      lsl.l   #2, d4
+00000046                            66      
+00000046                            67  * Set the null-terminated string address
+Line 68 ERROR: Undefined symbol
+00000046  47F9 004DBD16             68      lea     FloatingTextStrAddr, a3
+0000004C  2789 4000                 69      move.l  a1, (a3, d4)
+00000050                            70  
+00000050                            71  * Set time to live as well as its age
+Line 72 ERROR: Undefined symbol
+00000050  47F9 004DBD16             72      lea     FloatingTextDuration, a3
+00000056  2780 4000                 73      move.l  d0, (a3, d4)
+0000005A                            74  
+Line 75 ERROR: Undefined symbol
+0000005A  47F9 004DBD16             75      lea     FloatingTextAge, a3
+00000060  27BC 00000000 4000        76      move.l  #0, (a3, d4)
+00000068                            77      
+00000068                            78  * Set position
+Line 79 ERROR: Undefined symbol
+00000068  47F9 004DBD16             79      lea     FFloatingTextX, a3
+0000006E  2781 4000                 80      move.l  d1, (a3, d4)
+Line 81 ERROR: Undefined symbol
+00000072  47F9 004DBD16             81      lea     FFloatingTextY, a3
+00000078  2782 4000                 82      move.l  d2, (a3, d4)
+0000007C                            83      
+0000007C  4E75                      84      rts
+0000007E                            85  
+Line 86 ERROR: Symbol value differs between first and second pass
+0000007E                            86  continueSpawnFloatingText:
+0000007E  51C9 FFCA                 87      dbra    d1, spawnFloatingTextLoop
+00000082  4E75                      88      rts
+00000084                            89      
+Line 90 ERROR: Symbol value differs between first and second pass
+00000084                            90  floatingTextUpdate:
+00000084                            91  * Loop through IsFloatingTextActive to find active ones
+00000084                            92  * Registers used: D0-D3, A1
+Line 93 ERROR: Comma expected
+00000084                            93      move.l  #MAX_FLOATING_TEXT-1, d0
+Line 94 ERROR: Undefined symbol
+00000084  43F9 004DBD16             94      lea     IsFloatingTextActive, a1
+0000008A                            95      
+Line 96 ERROR: Symbol value differs between first and second pass
+0000008A                            96  floatingTextUpdateLoop:
+Line 97 ERROR: Undefined symbol
+0000008A  0C19 0016                 97      cmp.b   #FLOATING_TEXT_STATUS_ACTIVE, (a1)+
+0000008E  6600 0072                 98      bne     continueFloatingTextUpdateLoop
+00000092                            99      
+00000092                           100  * Found an active one, get the index
+00000092  2200                     101      move.l  d0, d1
+Line 102 ERROR: Comma expected
+00000094                           102      sub.l   #MAX_FLOATING_TEXT-1, d1
+00000094  4481                     103      neg.l   d1
+00000096  E589                     104      lsl.l   #2, d1                              ; Long offset
+00000098                           105  
+00000098                           106  * Move it up
+Line 107 ERROR: Undefined symbol
+00000098  2439 004DBD16            107      move.l  DeltaTime, d2
+Line 108 ERROR: Undefined symbol
+0000009E  ED8A                     108      lsl.l   #HALF_FRACTIONAL_BITS, d2           ; Preshift
+Line 109 ERROR: Invalid syntax
+000000A0                           109      mulu    #FFLOATING_TEXT_MOVE_SPEED>>HALF_FRACTIONAL_BITS, d2
+000000A0                           110  
+Line 111 ERROR: Undefined symbol
+000000A0  45F9 004DBD16            111      lea     FFloatingTextY, a2
+000000A6  95B2 1000                112      sub.l   d2, (a2, d1)
+000000AA                           113      
+000000AA                           114  * Increase its age by DeltaTime
+Line 115 ERROR: Undefined symbol
+000000AA  2439 004DBD16            115      move.l  DeltaTime, d2
+Line 116 ERROR: Undefined symbol
+000000B0  45F9 004DBD16            116      lea     FloatingTextAge, a2
+000000B6  D5B2 1000                117      add.l   d2, (a2, d1)
+000000BA                           118  
+000000BA                           119  * Check if it should be killed
+000000BA  2432 1000                120      move.l  (a2, d1), d2                        ; D2 contains age
+Line 121 ERROR: Undefined symbol
+000000BE  45F9 004DBD16            121      lea     FloatingTextDuration, a2
+000000C4  2632 1000                122      move.l  (a2, d1), d3
+000000C8  B682                     123      cmp.l   d2, d3
+000000CA  6C00 0036                124      bge     continueFloatingTextUpdateLoop      ; If duration >= age, we don't kill
+000000CE                           125  
+000000CE                           126  * Kill it here
+Line 127 ERROR: Undefined symbol
+000000CE  137C 0016 FFFF           127      move.b  #FLOATING_TEXT_STATUS_INACTIVE, -1(a1)
+000000D4                           128  
+Line 129 ERROR: Symbol value differs between first and second pass
+000000D4                           129  continueFloatingTextUpdateLoop:
+000000D4  51C8 FFD8                130      dbra    d0, floatingTextUpdateLoop
+000000D8  4E75                     131      rts
+Line 132 WARNING: END directive missing, starting address not set
+
+37 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CONTINUEFLOATINGTEXTUPDATELOOP  102
+CONTINUESPAWNFLOATINGTEXT  9C
+FLOATINGTEXTUPDATE  A2
+FLOATINGTEXTUPDATELOOP  AE
+INITFLOATINGTEXT    0
+INITFLOATINGTEXTLOOP  C
+SPAWNFLOATINGTEXT   3E
+SPAWNFLOATINGTEXTLOOP  4A
+SPAWNMOVESPEEDFLOATINGTEXT  16

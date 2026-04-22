@@ -1,0 +1,357 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/14/2024 12:48:54 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Sound
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/5/2024
+00000000                             5  * Description: Sound Effect Manager. Managing both music and other sound effects
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  playPlayerShootingSound:
+00000000                             9  * Play the player shooting sound once
+Line 10 ERROR: Invalid syntax
+00000000                            10      sub.l   #LONG_OFFSET*3, sp
+00000000  48D7 0007                 11      movem.l d0-d2, (sp)
+00000004                            12      
+Line 13 ERROR: Undefined symbol
+00000004  203C 004DBD16             13      move.l  #TASK_CONTROL_SOUND, d0
+Line 14 ERROR: Undefined symbol
+0000000A  223C 004DBD16             14      move.l  #SFX_PLAYER_SHOOTING, d1
+Line 15 ERROR: Undefined symbol
+00000010  243C 004DBD16             15      move.l  #SOUND_PLAY_ONCE, d2
+00000016  4E4F                      16      trap    #15
+00000018                            17      
+00000018  4CD7 0007                 18      movem.l (sp), d0-d2
+Line 19 ERROR: Invalid syntax
+0000001C                            19      add.l   #LONG_OFFSET*3, sp
+0000001C                            20      
+0000001C  4E75                      21      rts
+0000001E                            22      
+Line 23 ERROR: Symbol value differs between first and second pass
+0000001E                            23  playPlayerDeathSound:
+Line 24 ERROR: Invalid syntax
+0000001E                            24      sub.l   #LONG_OFFSET*3, sp
+0000001E  48D7 0007                 25      movem.l d0-d2, (sp)
+00000022                            26      
+Line 27 ERROR: Undefined symbol
+00000022  203C 004DBD16             27      move.l  #TASK_CONTROL_SOUND, d0
+Line 28 ERROR: Undefined symbol
+00000028  223C 004DBD16             28      move.l  #SFX_PLAYER_DEATH, d1
+Line 29 ERROR: Undefined symbol
+0000002E  243C 004DBD16             29      move.l  #SOUND_PLAY_ONCE, d2
+00000034  4E4F                      30      trap    #15
+00000036                            31      
+00000036  4CD7 0007                 32      movem.l (sp), d0-d2
+Line 33 ERROR: Invalid syntax
+0000003A                            33      add.l   #LONG_OFFSET*3, sp
+0000003A                            34      
+0000003A  4E75                      35      rts
+0000003C                            36  
+Line 37 ERROR: Symbol value differs between first and second pass
+0000003C                            37  playEnemyDeathSound:
+Line 38 ERROR: Invalid syntax
+0000003C                            38      sub.l   #LONG_OFFSET*3, sp
+0000003C  48D7 0007                 39      movem.l d0-d2, (sp)
+00000040                            40      
+Line 41 ERROR: Undefined symbol
+00000040  203C 004DBD16             41      move.l  #TASK_CONTROL_SOUND, d0
+Line 42 ERROR: Undefined symbol
+00000046  223C 004DBD16             42      move.l  #SFX_ENEMY_DEATH, d1
+Line 43 ERROR: Undefined symbol
+0000004C  243C 004DBD16             43      move.l  #SOUND_PLAY_ONCE, d2
+00000052  4E4F                      44      trap    #15
+00000054                            45      
+00000054  4CD7 0007                 46      movem.l (sp), d0-d2
+Line 47 ERROR: Invalid syntax
+00000058                            47      add.l   #LONG_OFFSET*3, sp
+00000058                            48      
+00000058  4E75                      49      rts
+0000005A                            50  
+Line 51 ERROR: Symbol value differs between first and second pass
+0000005A                            51  playPowerUpCollectedSound:
+Line 52 ERROR: Invalid syntax
+0000005A                            52      sub.l   #LONG_OFFSET*3, sp
+0000005A  48D7 0007                 53      movem.l d0-d2, (sp)
+0000005E                            54      
+Line 55 ERROR: Undefined symbol
+0000005E  203C 004DBD16             55      move.l  #TASK_CONTROL_SOUND, d0
+Line 56 ERROR: Undefined symbol
+00000064  223C 004DBD16             56      move.l  #SFX_POWERUP_COLLECTED, d1
+Line 57 ERROR: Undefined symbol
+0000006A  243C 004DBD16             57      move.l  #SOUND_PLAY_ONCE, d2
+00000070  4E4F                      58      trap    #15
+00000072                            59      
+00000072  4CD7 0007                 60      movem.l (sp), d0-d2
+Line 61 ERROR: Invalid syntax
+00000076                            61      add.l   #LONG_OFFSET*3, sp
+00000076                            62      
+00000076  4E75                      63      rts
+00000078                            64  
+Line 65 ERROR: Symbol value differs between first and second pass
+00000078                            65  playPlayerHurtSound:
+Line 66 ERROR: Invalid syntax
+00000078                            66      sub.l   #LONG_OFFSET*3, sp
+00000078  48D7 0007                 67      movem.l d0-d2, (sp)
+0000007C                            68      
+Line 69 ERROR: Undefined symbol
+0000007C  203C 004DBD16             69      move.l  #TASK_CONTROL_SOUND, d0
+Line 70 ERROR: Undefined symbol
+00000082  223C 004DBD16             70      move.l  #SFX_PLAYER_HURT, d1
+Line 71 ERROR: Undefined symbol
+00000088  243C 004DBD16             71      move.l  #SOUND_PLAY_ONCE, d2
+0000008E  4E4F                      72      trap    #15
+00000090                            73      
+00000090  4CD7 0007                 74      movem.l (sp), d0-d2
+Line 75 ERROR: Invalid syntax
+00000094                            75      add.l   #LONG_OFFSET*3, sp
+00000094                            76      
+00000094  4E75                      77      rts
+00000096                            78  
+Line 79 ERROR: Symbol value differs between first and second pass
+00000096                            79  playEnemyShootingSound:
+Line 80 ERROR: Invalid syntax
+00000096                            80      sub.l   #LONG_OFFSET*3, sp
+00000096  48D7 0007                 81      movem.l d0-d2, (sp)
+0000009A                            82      
+Line 83 ERROR: Undefined symbol
+0000009A  203C 004DBD16             83      move.l  #TASK_CONTROL_SOUND, d0
+Line 84 ERROR: Undefined symbol
+000000A0  223C 004DBD16             84      move.l  #SFX_ENEMY_SHOOTING, d1
+Line 85 ERROR: Undefined symbol
+000000A6  243C 004DBD16             85      move.l  #SOUND_PLAY_ONCE, d2
+000000AC  4E4F                      86      trap    #15
+000000AE                            87      
+000000AE  4CD7 0007                 88      movem.l (sp), d0-d2
+Line 89 ERROR: Invalid syntax
+000000B2                            89      add.l   #LONG_OFFSET*3, sp
+000000B2                            90      
+000000B2  4E75                      91      rts
+000000B4                            92      
+Line 93 ERROR: Symbol value differs between first and second pass
+000000B4                            93  playMainMenuMusic:
+Line 94 ERROR: Invalid syntax
+000000B4                            94      sub.l   #LONG_OFFSET*3, sp
+000000B4  48D7 0007                 95      movem.l d0-d2, (sp)
+000000B8                            96      
+000000B8  4EB9 000001AA             97      jsr     stopAllMusic
+000000BE                            98      
+Line 99 ERROR: Undefined symbol
+000000BE  203C 004DBD16             99      move.l  #TASK_CONTROL_SOUND, d0
+Line 100 ERROR: Undefined symbol
+000000C4  223C 004DBD16            100      move.l  #MUSIC_MAIN_MENU, d1
+Line 101 ERROR: Undefined symbol
+000000CA  243C 004DBD16            101      move.l  #SOUND_LOOP, d2
+000000D0  4E4F                     102      trap    #15
+000000D2                           103      
+Line 104 ERROR: Undefined symbol
+000000D2  B0BC 004DBD16            104      cmp.l   #SOUND_ERROR_CODE, d0
+000000D8  6700 01C8                105      beq     musicError
+000000DC                           106      
+000000DC  4CD7 0007                107      movem.l (sp), d0-d2
+Line 108 ERROR: Invalid syntax
+000000E0                           108      add.l   #LONG_OFFSET*3, sp
+000000E0                           109      
+000000E0  4E75                     110      rts
+000000E2                           111      
+Line 112 ERROR: Symbol value differs between first and second pass
+000000E2                           112  playGameLoopMusic:
+Line 113 ERROR: Invalid syntax
+000000E2                           113      sub.l   #LONG_OFFSET*3, sp
+000000E2  48D7 0007                114      movem.l d0-d2, (sp)
+000000E6                           115      
+000000E6  4EB9 000001AA            116      jsr     stopAllMusic
+000000EC                           117      
+Line 118 ERROR: Undefined symbol
+000000EC  203C 004DBD16            118      move.l  #TASK_CONTROL_SOUND, d0
+Line 119 ERROR: Undefined symbol
+000000F2  223C 004DBD16            119      move.l  #MUSIC_GAMELOOP, d1
+Line 120 ERROR: Undefined symbol
+000000F8  243C 004DBD16            120      move.l  #SOUND_LOOP, d2
+000000FE  4E4F                     121      trap    #15
+00000100                           122      
+Line 123 ERROR: Undefined symbol
+00000100  B0BC 004DBD16            123      cmp.l   #SOUND_ERROR_CODE, d0
+00000106  6700 019A                124      beq     musicError
+0000010A                           125      
+0000010A  4CD7 0007                126      movem.l (sp), d0-d2
+Line 127 ERROR: Invalid syntax
+0000010E                           127      add.l   #LONG_OFFSET*3, sp
+0000010E                           128      
+0000010E  4E75                     129      rts
+00000110                           130      
+Line 131 ERROR: Symbol value differs between first and second pass
+00000110                           131  playGameOverMusic:
+Line 132 ERROR: Invalid syntax
+00000110                           132      sub.l   #LONG_OFFSET*3, sp
+00000110  48D7 0007                133      movem.l d0-d2, (sp)
+00000114                           134      
+00000114  4EB9 000001AA            135      jsr     stopAllMusic
+0000011A                           136      
+Line 137 ERROR: Undefined symbol
+0000011A  203C 004DBD16            137      move.l  #TASK_CONTROL_SOUND, d0
+Line 138 ERROR: Undefined symbol
+00000120  223C 004DBD16            138      move.l  #MUSIC_GAMEOVER, d1
+Line 139 ERROR: Undefined symbol
+00000126  243C 004DBD16            139      move.l  #SOUND_LOOP, d2
+0000012C  4E4F                     140      trap    #15
+0000012E                           141      
+Line 142 ERROR: Undefined symbol
+0000012E  B0BC 004DBD16            142      cmp.l   #SOUND_ERROR_CODE, d0
+00000134  6700 016C                143      beq     musicError
+00000138                           144      
+00000138  4CD7 0007                145      movem.l (sp), d0-d2
+Line 146 ERROR: Invalid syntax
+0000013C                           146      add.l   #LONG_OFFSET*3, sp
+0000013C                           147      
+0000013C  4E75                     148      rts
+0000013E                           149  
+Line 150 ERROR: Symbol value differs between first and second pass
+0000013E                           150  stopAllMusic:
+Line 151 ERROR: Invalid syntax
+0000013E                           151      sub.l   #LONG_OFFSET*5, sp
+0000013E  48D7 020F                152      movem.l d0-d3/a1, (sp)
+00000142                           153      
+Line 154 ERROR: Undefined symbol
+00000142  203C 004DBD16            154      move.l  #TASK_CONTROL_SOUND, d0
+Line 155 ERROR: Undefined symbol
+00000148  243C 004DBD16            155      move.l  #SOUND_STOP_ALL, d2
+Line 156 ERROR: Comma expected
+0000014E                           156      move.l  #MUSIC_COUNT-1, d3
+Line 157 ERROR: Undefined symbol
+0000014E  43F9 004DBD16            157      lea     MusicArrayIndex, a1
+00000154  4281                     158      clr.l   d1
+00000156                           159      
+Line 160 ERROR: Symbol value differs between first and second pass
+00000156                           160  stopAllMusicLoop:
+00000156  1219                     161      move.b  (a1)+, d1
+00000158  4E4F                     162      trap    #15
+Line 163 ERROR: Undefined symbol
+0000015A  B0BC 004DBD16            163      cmp.l   #SOUND_ERROR_CODE, d0
+00000160  6700 0140                164      beq     musicError
+00000164                           165      
+00000164  51CB 0068                166      dbra    d3, stopAllMusicLoop
+00000168                           167      
+00000168  4CD7 020F                168      movem.l (sp), d0-d3/a1
+Line 169 ERROR: Invalid syntax
+0000016C                           169      add.l   #LONG_OFFSET*5, sp
+0000016C                           170      
+0000016C  4E75                     171      rts
+0000016E                           172  
+Line 173 ERROR: Symbol value differs between first and second pass
+0000016E                           173  loadSound:
+0000016E                           174  * Registers used: D0, D1, A1
+0000016E                           175      
+0000016E                           176  * Sound effects
+0000016E                           177  * Player shooting
+Line 178 ERROR: Undefined symbol
+0000016E  203C 004DBD16            178      move.l  #TASK_LOAD_SOUND, d0
+Line 179 ERROR: Undefined symbol
+00000174  43F9 004DBD16            179      lea     SoundPathPlayerShooting, a1
+Line 180 ERROR: Undefined symbol
+0000017A  223C 004DBD16            180      move.l  #SFX_PLAYER_SHOOTING, d1
+00000180  4E4F                     181      trap    #15
+00000182                           182      
+00000182                           183  * Player death
+Line 184 ERROR: Undefined symbol
+00000182  203C 004DBD16            184      move.l  #TASK_LOAD_SOUND, d0
+Line 185 ERROR: Undefined symbol
+00000188  43F9 004DBD16            185      lea     SoundPathPlayerDeath, a1
+Line 186 ERROR: Undefined symbol
+0000018E  223C 004DBD16            186      move.l  #SFX_PLAYER_DEATH, d1
+00000194  4E4F                     187      trap    #15
+00000196                           188      
+00000196                           189  * Enemy death
+Line 190 ERROR: Undefined symbol
+00000196  203C 004DBD16            190      move.l  #TASK_LOAD_SOUND, d0
+Line 191 ERROR: Undefined symbol
+0000019C  43F9 004DBD16            191      lea     SoundPathEnemyDeath, a1
+Line 192 ERROR: Undefined symbol
+000001A2  223C 004DBD16            192      move.l  #SFX_ENEMY_DEATH, d1
+000001A8  4E4F                     193      trap    #15
+000001AA                           194      
+000001AA                           195  * Power-up collected
+Line 196 ERROR: Undefined symbol
+000001AA  203C 004DBD16            196      move.l  #TASK_LOAD_SOUND, d0
+Line 197 ERROR: Undefined symbol
+000001B0  43F9 004DBD16            197      lea     SoundPathPowerUpCollected, a1
+Line 198 ERROR: Undefined symbol
+000001B6  223C 004DBD16            198      move.l  #SFX_POWERUP_COLLECTED, d1
+000001BC  4E4F                     199      trap    #15
+000001BE                           200      
+000001BE                           201  * Player hurt
+Line 202 ERROR: Undefined symbol
+000001BE  203C 004DBD16            202      move.l  #TASK_LOAD_SOUND, d0
+Line 203 ERROR: Undefined symbol
+000001C4  43F9 004DBD16            203      lea     SoundPathPlayerHurt, a1
+Line 204 ERROR: Undefined symbol
+000001CA  223C 004DBD16            204      move.l  #SFX_PLAYER_HURT, d1
+000001D0  4E4F                     205      trap    #15
+000001D2                           206      
+000001D2                           207  * Enemy shooting
+Line 208 ERROR: Undefined symbol
+000001D2  203C 004DBD16            208      move.l  #TASK_LOAD_SOUND, d0
+Line 209 ERROR: Undefined symbol
+000001D8  43F9 004DBD16            209      lea     SoundPathEnemyShooting, a1
+Line 210 ERROR: Undefined symbol
+000001DE  223C 004DBD16            210      move.l  #SFX_ENEMY_SHOOTING, d1
+000001E4  4E4F                     211      trap    #15
+000001E6                           212      
+000001E6                           213  * Music
+000001E6                           214  * Main menu
+Line 215 ERROR: Undefined symbol
+000001E6  203C 004DBD16            215      move.l  #TASK_LOAD_SOUND, d0
+Line 216 ERROR: Undefined symbol
+000001EC  43F9 004DBD16            216      lea     MusicPathMainMenu, a1
+Line 217 ERROR: Undefined symbol
+000001F2  223C 004DBD16            217      move.l  #MUSIC_MAIN_MENU, d1
+000001F8  4E4F                     218      trap    #15
+000001FA                           219      
+000001FA                           220  * Gameloop
+Line 221 ERROR: Undefined symbol
+000001FA  203C 004DBD16            221      move.l  #TASK_LOAD_SOUND, d0
+Line 222 ERROR: Undefined symbol
+00000200  43F9 004DBD16            222      lea     MusicPathGameLoop, a1
+Line 223 ERROR: Undefined symbol
+00000206  223C 004DBD16            223      move.l  #MUSIC_GAMELOOP, d1
+0000020C  4E4F                     224      trap    #15
+0000020E                           225      
+0000020E                           226  * Gameover
+Line 227 ERROR: Undefined symbol
+0000020E  203C 004DBD16            227      move.l  #TASK_LOAD_SOUND, d0
+Line 228 ERROR: Undefined symbol
+00000214  43F9 004DBD16            228      lea     MusicPathGameOver, a1
+Line 229 ERROR: Undefined symbol
+0000021A  223C 004DBD16            229      move.l  #MUSIC_GAMEOVER, d1
+00000220  4E4F                     230      trap    #15
+00000222                           231      
+00000222  4E75                     232      rts
+00000224                           233      
+Line 234 ERROR: Symbol value differs between first and second pass
+00000224                           234  musicError:
+00000224  4AFC                     235      illegal
+00000226                           236  
+00000226                           237  
+Line 238 WARNING: END directive missing, starting address not set
+
+94 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+LOADSOUND           1EC
+MUSICERROR          2A2
+PLAYENEMYDEATHSOUND  54
+PLAYENEMYSHOOTINGSOUND  D2
+PLAYGAMELOOPMUSIC   136
+PLAYGAMEOVERMUSIC   170
+PLAYMAINMENUMUSIC   FC
+PLAYPLAYERDEATHSOUND  2A
+PLAYPLAYERHURTSOUND  A8
+PLAYPLAYERSHOOTINGSOUND  0
+PLAYPOWERUPCOLLECTEDSOUND  7E
+STOPALLMUSIC        1AA
+STOPALLMUSICLOOP    1CE

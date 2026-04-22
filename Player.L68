@@ -1,0 +1,482 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/14/2024 12:26:51 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Player
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/11/2024
+00000000                             5  * Description: Player character logic. Originally in GameLogic.
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  initializePlayer:
+00000000                             9  * Initialize anything player-related, should be called when starting the game loop
+00000000  4EB9 00000060             10      jsr     initializePlayerPosition
+00000006  4EB9 00000076             11      jsr     initIsPlayerProjectileActive
+0000000C  4EB9 00000054             12      jsr     initPlayerAttackSpeed
+00000012  4EB9 00000026             13      jsr     initPlayerLives
+00000018  4EB9 00000032             14      jsr     initPlayerInvulTime
+0000001E  4EB9 0000003E             15      jsr     initPlayerBlinkTime
+00000024  4E75                      16      rts
+00000026                            17  
+00000026                            18  initPlayerLives:
+Line 19 ERROR: Undefined symbol
+00000026  23FC 004DBD16 005455B8    19      move.l  #PLAYER_STARTING_LIVES, PlayerLives
+00000030  4E75                      20      rts
+00000032                            21      
+00000032                            22  initPlayerInvulTime:
+Line 23 ERROR: Undefined symbol
+00000032  23FC 00000000 005455B8    23      move.l  #0, PlayerInvulTime
+0000003C  4E75                      24      rts
+0000003E                            25      
+0000003E                            26  initPlayerBlinkTime:
+Line 27 ERROR: Undefined symbol
+0000003E  23FC 00000000 005455B8    27      move.l  #0, PlayerBlinkTime
+00000048  4E75                      28      rts
+0000004A                            29      
+0000004A                            30  initPlayerSpriteActive:
+Line 31 ERROR: Undefined symbol
+0000004A  13FC 0016 005455B8        31      move.b  #TRUE, PlayerSpriteActive
+00000052  4E75                      32      rts
+00000054                            33  
+00000054                            34  initPlayerAttackSpeed:
+00000054                            35  * Might be redundant since we already set the value in the initializePowerUpLevels function
+Line 36 ERROR: Undefined symbol
+00000054  23F9 004DBD16 005455B8    36      move.l  PowerUpAtkCdValues, PlayerAttackCooldown
+0000005E  4E75                      37      rts
+00000060                            38      
+00000060                            39  initializePlayerPosition:
+Line 40 ERROR: Undefined symbol
+00000060  23FC 004DBD16 005455B8    40      move.l  #FPLAYER_START_X, FPlayerX
+Line 41 ERROR: Undefined symbol
+0000006A  23FC 004DBD16 005455B8    41      move.l  #FPLAYER_START_Y, FPlayerY
+00000074  4E75                      42      rts
+00000076                            43      
+00000076                            44  initIsPlayerProjectileActive:
+00000076                            45  * Set everything to inactive initially
+00000076                            46  * Registers used: D0, A1
+Line 47 ERROR: Comma expected
+00000076                            47      move.l  #MAX_PLAYER_PROJECTILE-1, d0
+Line 48 ERROR: Undefined symbol
+00000076  43F9 004DBD16             48      lea     IsProjectileActive, a1
+0000007C                            49      
+Line 50 ERROR: Symbol value differs between first and second pass
+0000007C                            50  initIsPlayerProjectileActiveLoop:
+Line 51 ERROR: Undefined symbol
+0000007C  12FC 0016                 51      move.b  #PLAYER_PROJ_STATUS_INACTIVE, (a1)+
+00000080  51C8 0000                 52      dbra    d0, initIsPlayerProjectileActiveLoop
+00000084                            53      
+00000084  4E75                      54      rts
+00000086                            55  
+Line 56 ERROR: Symbol value differs between first and second pass
+00000086                            56  playerUpdate:
+00000086  4EB9 000000EC             57      jsr     updatePlayerPosition    ; Need D7 from input cycle's return as its parameter 
+0000008C  4EB9 000001A2             58      jsr     attemptSpawningPlayerProjectile
+00000092  4EB9 00000278             59      jsr     updatePlayerProjectilePositions
+00000098  4EB9 000000A6             60      jsr     updatePlayerInvulTime
+0000009E  4E75                      61      rts
+000000A0                            62  
+Line 63 ERROR: Symbol value differs between first and second pass
+000000A0                            63  updatePlayerInvulTime:
+000000A0                            64  * If invul time >= 0, then we decrease it by DeltaTime
+000000A0                            65  * Otherwise don't do anything
+000000A0                            66  
+000000A0                            67  * Registers used: D0
+000000A0                            68  
+Line 69 ERROR: Undefined symbol
+000000A0  0CB9 00000000 005455B8    69      cmp.l   #0, PlayerInvulTime
+000000AA  6F00 003E                 70      ble     invulTimeReturn
+000000AE                            71      
+000000AE                            72  * Player is invul right now, decrease the timer here
+Line 73 ERROR: Undefined symbol
+000000AE  2039 004DBD16             73      move.l  DeltaTime, d0
+Line 74 ERROR: Undefined symbol
+000000B4  91B9 005455B8             74      sub.l   d0, PlayerInvulTime
+000000BA                            75      
+000000BA                            76  * Check whether we decrease it too much or not
+Line 77 ERROR: Undefined symbol
+000000BA  0CB9 00000000 005455B8    77      cmp.l   #0, PlayerInvulTime
+000000C4  6E00 0024                 78      bgt     invulTimeReturn
+000000C8                            79      
+000000C8                            80  * Zero or negative amount, set it 0 and reset the blinking time
+Line 81 ERROR: Undefined symbol
+000000C8  23FC 00000000 005455B8    81      move.l  #0, PlayerInvulTime
+Line 82 ERROR: Undefined symbol
+000000D2  23FC 00000000 005455B8    82      move.l  #0, PlayerBlinkTime
+Line 83 ERROR: Undefined symbol
+000000DC  13FC 0016 005455B8        83      move.b  #TRUE, PlayerSpriteActive
+000000E4                            84      
+Line 85 ERROR: Symbol value differs between first and second pass
+000000E4                            85  invulTimeReturn:
+000000E4  4E75                      86      rts
+000000E6                            87  
+Line 88 ERROR: Symbol value differs between first and second pass
+000000E6                            88  updatePlayerPosition:
+000000E6                            89  * Save player's last position for drawing background chunk
+000000E6                            90  * Note: Perhaps can check if the player move and only redraw if they do to optimize further
+000000E6                            91  
+000000E6                            92  * Parameters:
+000000E6                            93  * D7: Direction enum from input
+000000E6                            94  
+000000E6                            95  * Other registers used: D1-D3, A0
+000000E6                            96  
+000000E6                            97  * Handle player X position
+000000E6  E58F                      98      lsl.l   #2, d7                      ; Longword lookup table = 4 bytes
+Line 99 ERROR: Undefined symbol
+000000E8  41F9 004DBD16             99      lea     FDirectionMapX, a0
+000000EE  2230 7000                100      move.l  (a0, d7), d1                ; D1 contains FDeltaX to be added to player's position X
+000000F2                           101      
+Line 102 ERROR: Undefined symbol
+000000F2  EC89                     102      lsr.l   #HALF_FRACTIONAL_BITS, d1
+Line 103 ERROR: Undefined symbol
+000000F4  2439 004DBD16            103      move.l  DeltaTime, d2               ; Scale by DeltaTime
+Line 104 ERROR: Undefined symbol
+000000FA  ED8A                     104      lsl.l   #HALF_FRACTIONAL_BITS, d2
+000000FC  C3C2                     105      muls.w  d2, d1
+000000FE                           106  
+Line 107 ERROR: Undefined symbol
+000000FE  EC89                     107      lsr.l   #HALF_FRACTIONAL_BITS, d1
+Line 108 ERROR: Undefined symbol
+00000100  2439 004DBD16            108      move.l  FPlayerSpeed, d2
+Line 109 ERROR: Undefined symbol
+00000106  EC8A                     109      lsr.l   #HALF_FRACTIONAL_BITS, d2
+00000108  C3C2                     110      muls.w  d2, d1
+Line 111 ERROR: Undefined symbol
+0000010A  D3B9 005455B8            111      add.l   d1, FPlayerX
+00000110                           112      
+00000110                           113  * Clamp LeftX value
+Line 114 ERROR: Undefined symbol
+00000110  0CB9 004DBD16 005455B8   114      cmp.l   #FPLAYER_SCREEN_OFFSET_LEFT, FPlayerX
+0000011A  6C00 0012                115      bge     skipClampingLeftX
+0000011E                           116      
+Line 117 ERROR: Undefined symbol
+0000011E  23FC 004DBD16 005455B8   117      move.l  #FPLAYER_SCREEN_OFFSET_LEFT, FPlayerX
+00000128                           118      
+Line 119 ERROR: Symbol value differs between first and second pass
+00000128                           119  skipClampingLeftX:
+00000128                           120  * Clamp RightX value
+Line 121 ERROR: Undefined symbol
+00000128  0CB9 004DBD16 005455B8   121      cmp.l   #FPLAYER_SCREEN_OFFSET_RIGHT, FPlayerX
+00000132  6F00 0012                122      ble     skipClampingRightX
+00000136                           123      
+Line 124 ERROR: Undefined symbol
+00000136  23FC 004DBD16 005455B8   124      move.l  #FPLAYER_SCREEN_OFFSET_RIGHT, FPlayerX
+00000140                           125  
+Line 126 ERROR: Symbol value differs between first and second pass
+00000140                           126  skipClampingRightX:    
+00000140                           127  * Handle player Y position
+Line 128 ERROR: Undefined symbol
+00000140  41F9 004DBD16            128      lea     FDirectionMapY, a0
+00000146  2230 7000                129      move.l  (a0, d7), d1                ; D1 contains FDeltaY to be added to player's position Y
+0000014A                           130      
+Line 131 ERROR: Undefined symbol
+0000014A  EC89                     131      lsr.l   #HALF_FRACTIONAL_BITS, d1
+Line 132 ERROR: Undefined symbol
+0000014C  2439 004DBD16            132      move.l  DeltaTime, d2               ; Scale by DeltaTime
+Line 133 ERROR: Undefined symbol
+00000152  ED8A                     133      lsl.l   #HALF_FRACTIONAL_BITS, d2
+00000154  C3C2                     134      muls.w  d2, d1
+00000156                           135      
+Line 136 ERROR: Undefined symbol
+00000156  EC89                     136      lsr.l   #HALF_FRACTIONAL_BITS, d1
+Line 137 ERROR: Undefined symbol
+00000158  2439 004DBD16            137      move.l  FPlayerSpeed, d2
+Line 138 ERROR: Undefined symbol
+0000015E  EC8A                     138      lsr.l   #HALF_FRACTIONAL_BITS, d2
+00000160  C3C2                     139      muls.w  d2, d1
+Line 140 ERROR: Undefined symbol
+00000162  D3B9 005455B8            140      add.l   d1, FPlayerY
+00000168                           141  
+00000168                           142  * Clamp UpperY value
+Line 143 ERROR: Undefined symbol
+00000168  0CB9 004DBD16 005455B8   143      cmp.l   #FPLAYER_SCREEN_OFFSET_UPPER, FPlayerY
+00000172  6C00 0012                144      bge     skipClampingUpperY
+00000176                           145      
+Line 146 ERROR: Undefined symbol
+00000176  23FC 004DBD16 005455B8   146      move.l  #FPLAYER_SCREEN_OFFSET_UPPER, FPlayerY
+00000180                           147      
+Line 148 ERROR: Symbol value differs between first and second pass
+00000180                           148  skipClampingUpperY:
+Line 149 ERROR: Undefined symbol
+00000180  0CB9 004DBD16 005455B8   149      cmp.l   #FPLAYER_SCREEN_OFFSET_LOWER, FPlayerY
+0000018A  6F00 0012                150      ble     skipClampingLowerY
+0000018E                           151      
+Line 152 ERROR: Undefined symbol
+0000018E  23FC 004DBD16 005455B8   152      move.l  #FPLAYER_SCREEN_OFFSET_LOWER, FPlayerY
+00000198                           153      
+Line 154 ERROR: Symbol value differs between first and second pass
+00000198                           154  skipClampingLowerY:
+00000198  E48F                     155      lsr.l   #2, d7                      ; Shift back so the variable isn't changed (might be unnecessary)
+0000019A  4E75                     156      rts
+0000019C                           157      
+Line 158 ERROR: Symbol value differs between first and second pass
+0000019C                           158  attemptSpawningPlayerProjectile:
+0000019C                           159  * Check if the player is pressing the attack button
+0000019C                           160  * If they are, check whether it's been enough time since last player has shot
+0000019C                           161  * If it is, then create a new projectile
+0000019C                           162  
+0000019C                           163  * Registers used: D0-D6, A1-A2
+0000019C                           164  
+0000019C                           165  * Check if the attack button is being pressed
+Line 166 ERROR: Undefined symbol
+0000019C  0C39 0016 005455B8       166      cmp.b   #FALSE, IsPlayerAttacking
+000001A4  6700 00D0                167      beq     skipPlayerProjectileSpawning
+000001A8                           168      
+000001A8                           169  * Check the time
+Line 170 ERROR: Undefined symbol
+000001A8  4EB9 004DBD16            170      jsr     getTimeSinceMidnight
+Line 171 ERROR: Undefined symbol
+000001AE  92B9 004DBD16            171      sub.l   LastPlayerShootingTime, d1  ; D1 = Time between right now and last shooting
+Line 172 ERROR: Undefined symbol
+000001B4  B2B9 004DBD16            172      cmp.l   PlayerAttackCooldown, d1
+000001BA  6D00 00BA                173      blt     skipPlayerProjectileSpawning
+000001BE                           174  
+000001BE                           175  * Spawn the projectile here
+000001BE                           176  * Firstly, loop to find first SpreadLevel+1 inactive projectiles
+000001BE  70FF                     177      move.l  #-1, d0
+Line 178 ERROR: Undefined symbol
+000001C0  43F9 004DBD16            178      lea     IsProjectileActive, a1
+000001C6                           179      
+Line 180 ERROR: Undefined symbol
+000001C6  23F9 004DBD16 005455B8   180      move.l  PowerUpSpreadLevel, PlayerProjToSpawn
+000001D0                           181      
+Line 182 ERROR: Symbol value differs between first and second pass
+000001D0                           182  playerProjectileSpawningLoop:
+000001D0  5280                     183      add.l   #1, d0
+000001D2                           184      
+Line 185 ERROR: Undefined symbol
+000001D2  B0BC 004DBD16            185      cmp.l   #MAX_PLAYER_PROJECTILE, d0
+000001D8  6C00 009C                186      bge     skipPlayerProjectileSpawning    ; There's more than max projectile allowed on the screen
+000001DC                           187     
+Line 188 ERROR: Undefined symbol
+000001DC  0C31 0016 0000           188      cmp.b   #PLAYER_PROJ_STATUS_INACTIVE, (a1, d0)
+000001E2  6700 000A                189      beq     spawnPlayerProjectile           ; If it's inactive, then spawn
+000001E6                           190      
+000001E6  60EE                     191      bra     playerProjectileSpawningLoop
+000001E8                           192      
+Line 193 ERROR: Symbol value differs between first and second pass
+000001E8                           193  spawnPlayerProjectile:
+Line 194 ERROR: Undefined symbol
+000001E8  13BC 0016 0000           194      move.b  #PLAYER_PROJ_STATUS_ACTIVE, (a1, d0)    ; Flag as active
+000001EE  2600                     195      move.l  d0, d3
+000001F0  E58B                     196      lsl.l   #2, d3                                  ; Long offset
+000001F2                           197      
+000001F2                           198  * Set positions
+000001F2                           199  * To spawn in the middle, we need parameters to be:
+000001F2                           200  * ProjectileX = PlayerX + PlayerSizeX
+Line 201 ERROR: Undefined symbol
+000001F2  45F9 004DBD16            201      lea     FProjectilePosX, a2
+Line 202 ERROR: Undefined symbol
+000001F8  2239 004DBD16            202      move.l  FPlayerX, d1
+Line 203 ERROR: Invalid syntax
+000001FE                           203      add.l   #PLAYER_SIZE_X<<FRACTIONAL_BITS, d1
+000001FE  2581 3000                204      move.l  d1, (a2, d3)
+00000202                           205  
+00000202                           206  * ProjectileY = PlayerY + PlayerSizeY/2 
+00000202                           207  *               - ProjectileSizeY 
+00000202                           208  *               + (PlayerProjToSpawn - (1/2) * SpreadLevel) 
+00000202                           209  *               * (Gap / (SpreadLevel + 1))
+00000202                           210  
+Line 211 ERROR: Undefined symbol
+00000202  45F9 004DBD16            211      lea     FProjectilePosY, a2
+Line 212 ERROR: Undefined symbol
+00000208  2239 004DBD16            212      move.l  FPlayerY, d1
+Line 213 ERROR: Invalid syntax
+0000020E                           213      add.l   #PLAYER_SIZE_Y<<FRACTIONAL_BITS>>1, d1
+Line 214 ERROR: Invalid syntax
+0000020E                           214      sub.l   #PLAYER_PROJECTILE_SIZE_Y<<FRACTIONAL_BITS>>1, d1   ; PlayerY + PlayerSizeY/2 
+0000020E                           215      
+Line 216 ERROR: Undefined symbol
+0000020E  2439 004DBD16            216      move.l  PowerUpSpreadLevel, d2
+Line 217 ERROR: Invalid syntax
+00000214                           217      lsl.l   #FRACTIONAL_BITS>>1, d2                     ; To fixed point, mult by 1/2
+Line 218 ERROR: Undefined symbol
+00000214  2839 004DBD16            218      move.l  PlayerProjToSpawn, d4
+Line 219 ERROR: Undefined symbol
+0000021A  ED8C                     219      lsl.l   #FRACTIONAL_BITS, d4
+0000021C  9882                     220      sub.l   d2, d4                                      ; PlayerProjToSpawn - (1/2) * SpreadLevel
+0000021E                           221      
+Line 222 ERROR: Undefined symbol
+0000021E  2A3C 004DBD16            222      move.l  #FPLAYER_PROJ_SPREAD_GAP, d5
+Line 223 ERROR: Undefined symbol
+00000224  2C39 004DBD16            223      move.l  PowerUpSpreadLevel, d6
+0000022A  5286                     224      add.l   #1, d6
+0000022C  8BC6                     225      divs    d6, d5
+0000022E  4845                     226      swap    d5
+00000230  3A3C 0000                227      move.w  #0, d5
+00000234  4845                     228      swap    d5                                          ; Gap / (SpreadLevel - 1)
+00000236                           229      
+Line 230 ERROR: Undefined symbol
+00000236  EC8C                     230      lsr.l   #HALF_FRACTIONAL_BITS, d4                   ; Preshift
+00000238  C9C5                     231      muls    d5, d4
+0000023A  D284                     232      add.l   d4, d1
+0000023C  2581 3000                233      move.l  d1, (a2, d3)
+00000240                           234      
+00000240                           235  * Loop back for spread mechanic
+Line 236 ERROR: Undefined symbol
+00000240  53B9 005455B8            236      sub.l   #1, PlayerProjToSpawn
+00000246  6A8E                     237      bpl     playerProjectileSpawningLoop
+00000248                           238      
+00000248                           239  * Finish spawning
+Line 240 ERROR: Undefined symbol
+00000248  4EB9 004DBD16            240      jsr     getTimeSinceMidnight
+Line 241 ERROR: Undefined symbol
+0000024E  23C1 005455B8            241      move.l  d1, LastPlayerShootingTime
+00000254                           242      
+Line 243 ERROR: Undefined symbol
+00000254  4EB9 004DBD16            243      jsr     playPlayerShootingSound
+0000025A                           244      
+Line 245 ERROR: Symbol value differs between first and second pass
+0000025A                           245  skipPlayerProjectileSpawning:
+0000025A  4E75                     246      rts
+0000025C                           247  
+Line 248 ERROR: Symbol value differs between first and second pass
+0000025C                           248  updatePlayerProjectilePositions:
+0000025C                           249  * Registers used: D0-D3, A1, A2
+0000025C  70FF                     250      move.l  #-1, d0
+Line 251 ERROR: Undefined symbol
+0000025E  43F9 004DBD16            251      lea     IsProjectileActive, a1
+00000264                           252      
+Line 253 ERROR: Symbol value differs between first and second pass
+00000264                           253  playerProjectilePositionLoop:
+00000264  5280                     254      add.l   #1, d0
+00000266                           255      
+Line 256 ERROR: Undefined symbol
+00000266  B0BC 004DBD16            256      cmp.l   #MAX_PLAYER_PROJECTILE, d0
+0000026C  6C00 005C                257      bge     skipProjectilePositionUpdate
+00000270                           258      
+Line 259 ERROR: Undefined symbol
+00000270  0C31 0016 0000           259      cmp.b   #PLAYER_PROJ_STATUS_ACTIVE, (a1, d0)
+00000276  6700 0020                260      beq     moveProjectile
+0000027A                           261      
+0000027A  6004                     262      bra     playerProjectilePositionLoop
+0000027C                           263      
+Line 264 ERROR: Symbol value differs between first and second pass
+0000027C                           264  moveProjectile:
+0000027C                           265  * Move from left to right
+0000027C  2200                     266      move.l  d0, d1
+0000027E  E589                     267      lsl.l   #2, d1                          ; Long offset
+00000280                           268      
+Line 269 ERROR: Undefined symbol
+00000280  45F9 004DBD16            269      lea     FProjectilePosX, a2
+00000286                           270      
+Line 271 ERROR: Invalid syntax
+00000286                           271      move.l  #FPLAYER_PROJECTILE_SPEED>>HALF_FRACTIONAL_BITS, d2     ; Preshifting for multiplication
+Line 272 ERROR: Undefined symbol
+00000286  2639 004DBD16            272      move.l  DeltaTime, d3
+Line 273 ERROR: Undefined symbol
+0000028C  ED8B                     273      lsl.l   #HALF_FRACTIONAL_BITS, d3       ; To fixed point and preshifting
+0000028E  C7C2                     274      muls.w  d2, d3
+00000290                           275      
+00000290  D7B2 1000                276      add.l   d3, (a2, d1)                    ; Move the D1th projectile to the right
+00000294                           277      
+00000294                           278  * Check whether we have to kill the projectiles that are offscreen
+Line 279 ERROR: Invalid syntax
+00000294                           279      cmp.l   #WINDOW_WIDTH<<FRACTIONAL_BITS, (a2, d1)
+00000294  6D00 0032                280      blt     skipKillingOffscreenProjectile
+00000298                           281      
+00000298                           282  * Kill it here
+Line 283 ERROR: Undefined symbol
+00000298  13BC 0016 0000           283      move.b  #PLAYER_PROJ_STATUS_INACTIVE, (a1, d0)
+0000029E                           284      
+Line 285 ERROR: Symbol value differs between first and second pass
+0000029E                           285  skipKillingOffscreenProjectile:
+0000029E  60E0                     286      bra     playerProjectilePositionLoop
+000002A0                           287      
+Line 288 ERROR: Symbol value differs between first and second pass
+000002A0                           288  skipProjectilePositionUpdate:
+000002A0  4E75                     289      rts
+000002A2                           290      
+Line 291 ERROR: Symbol value differs between first and second pass
+000002A2                           291  getProjectilePosition:
+000002A2                           292  * Parameters:
+000002A2                           293  * D2: Index of the projectile (make sure that it's active)
+000002A2                           294  
+000002A2                           295  * Returns:
+000002A2                           296  * D4: FPositionX of the projectile
+000002A2                           297  * D5: FPositionY of the projectile
+000002A2                           298  
+000002A2                           299  * Other registers used: A3
+000002A2  E58A                     300      lsl.l   #2, d2                          ; Long offset
+000002A4                           301      
+Line 302 ERROR: Undefined symbol
+000002A4  47F9 004DBD16            302      lea     FProjectilePosX, a3
+000002AA  2833 2000                303      move.l  (a3, d2), d4
+000002AE                           304      
+Line 305 ERROR: Undefined symbol
+000002AE  47F9 004DBD16            305      lea     FProjectilePosY, a3
+000002B4  2A33 2000                306      move.l  (a3, d2), d5
+000002B8                           307      
+000002B8  4E75                     308      rts
+000002BA                           309  
+Line 310 ERROR: Symbol value differs between first and second pass
+000002BA                           310  onPlayerHit:
+000002BA                           311  * Call this when the player is hit
+000002BA                           312  * Check if they're invulnerable or not
+Line 313 ERROR: Undefined symbol
+000002BA  0CB9 00000000 005455B8   313      cmp.l   #0, PlayerInvulTime
+000002C4  6E00 0056                314      bgt     skipReducePlayerLives
+000002C8                           315  
+000002C8                           316  * Reduces player's life by 1, if they hit negative, show gameover screen
+Line 317 ERROR: Undefined symbol
+000002C8  53B9 005455B8            317      sub.l   #1, PlayerLives
+Line 318 ERROR: Undefined symbol
+000002CE  6B00 BA46                318      bmi     gameOver
+000002D2                           319      
+000002D2                           320  * The player's not dead, set invul frame and initial blinking time
+Line 321 ERROR: Undefined symbol
+000002D2  23FC 004DBD16 005455B8   321      move.l  #PLAYER_INVUL_TIME_AFTER_HIT, PlayerInvulTime
+Line 322 ERROR: Undefined symbol
+000002DC  23FC 004DBD16 005455B8   322      move.l  #PLAYER_BLINK_TIME, PlayerBlinkTime
+000002E6                           323      
+000002E6                           324  * Update the lives UI
+Line 325 ERROR: Undefined symbol
+000002E6  4EB9 004DBD16            325      jsr     drawPlayerLivesCount
+000002EC                           326      
+000002EC                           327  * Play hurt sound
+Line 328 ERROR: Undefined symbol
+000002EC  4EB9 004DBD16            328      jsr     playPlayerHurtSound
+000002F2                           329  
+Line 330 ERROR: Symbol value differs between first and second pass
+000002F2                           330  skipReducePlayerLives:
+000002F2  4E75                     331      rts
+000002F4                           332  
+000002F4                           333  
+Line 334 WARNING: END directive missing, starting address not set
+
+107 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ATTEMPTSPAWNINGPLAYERPROJECTILE  1A2
+GETPROJECTILEPOSITION  2CC
+INITIALIZEPLAYER    0
+INITIALIZEPLAYERPOSITION  60
+INITISPLAYERPROJECTILEACTIVE  76
+INITISPLAYERPROJECTILEACTIVELOOP  82
+INITPLAYERATTACKSPEED  54
+INITPLAYERBLINKTIME  3E
+INITPLAYERINVULTIME  32
+INITPLAYERLIVES     26
+INITPLAYERSPRITEACTIVE  4A
+INVULTIMERETURN     EA
+MOVEPROJECTILE      298
+ONPLAYERHIT         2E4
+PLAYERPROJECTILEPOSITIONLOOP  280
+PLAYERPROJECTILESPAWNINGLOOP  1D6
+PLAYERUPDATE        8C
+SKIPCLAMPINGLEFTX   12E
+SKIPCLAMPINGLOWERY  19E
+SKIPCLAMPINGRIGHTX  146
+SKIPCLAMPINGUPPERY  186
+SKIPKILLINGOFFSCREENPROJECTILE  2C8
+SKIPPLAYERPROJECTILESPAWNING  276
+SKIPPROJECTILEPOSITIONUPDATE  2CA
+SKIPREDUCEPLAYERLIVES  31C
+SPAWNPLAYERPROJECTILE  1EE
+UPDATEPLAYERINVULTIME  A6
+UPDATEPLAYERPOSITION  EC
+UPDATEPLAYERPROJECTILEPOSITIONS  278

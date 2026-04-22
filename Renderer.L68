@@ -1,0 +1,1421 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/13/2024 11:13:30 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Renderer
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 5/31/2024
+00000000                             5  * Description: Rendering subroutines
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  initializeRenderer:
+00000000                             9  * Initialize anything graphics-related
+00000000  4EB9 00000346             10      jsr     drawPlayer
+00000006  4EB9 0000007C             11      jsr     initializePlayerAnim
+0000000C  4EB9 00000092             12      jsr     initializeFuelGauge
+Line 13 ERROR: Undefined symbol
+00000012  4EB9 004DBD16             13      jsr     initFloatingText
+Line 14 ERROR: Undefined symbol
+00000018  4EB9 004DBD16             14      jsr     spawnDifficultyFloatingText
+0000001E  4EB9 0000098E             15      jsr     swapBuffers
+00000024  4E75                      16      rts
+00000026                            17  
+00000026                            18  renderCycle:
+00000026  4EB9 0000093C             19      jsr     clearPlayableScreen
+0000002C  4EB9 000000D0             20      jsr     drawFloatingText
+00000032  4EB9 000007BE             21      jsr     drawStars
+00000038  4EB9 00000842             22      jsr     drawPowerUps
+0000003E  4EB9 00000696             23      jsr     drawEnemyProjectiles
+00000044  4EB9 00000718             24      jsr     drawEnemyProjectilesBGTrail
+0000004A  4EB9 00000406             25      jsr     drawEnemies
+00000050  4EB9 0000061A             26      jsr     drawPlayerProjectiles
+00000056  4EB9 00000346             27      jsr     drawPlayer
+0000005C  4EB9 00000248             28      jsr     drawFuelGauge
+00000062  4EB9 00000194             29      jsr     drawFuelText
+00000068  4EB9 00000170             30      jsr     drawLivesText
+0000006E  4EB9 0000096C             31      jsr     drawPlayerLivesCount
+00000074  4EB9 0000098E             32      jsr     swapBuffers
+0000007A  4E75                      33      rts
+0000007C                            34  
+0000007C                            35  initializePlayerAnim:
+0000007C                            36  * Set up the memory for player's animation system
+0000007C                            37  * Registers used: D1
+Line 38 ERROR: Undefined symbol
+0000007C  13FC 0000 005455B8        38      move.b  #0, CurrentPlayerFrame
+Line 39 ERROR: Undefined symbol
+00000084  4EB9 004DBD16             39      jsr     getTimeSinceMidnight
+Line 40 ERROR: Undefined symbol
+0000008A  23C1 005455B8             40      move.l  d1, TimeSinceLastPlayerFrame
+00000090  4E75                      41      rts
+00000092                            42      
+00000092                            43  initializeFuelGauge:
+00000092                            44  * Draw fuel gauge proportionally to the max fuel gauge
+00000092                            45  * Registers used: D0-D5
+00000092  4EB9 00000268             46      jsr     getFuelGaugeWidth                               ; D5 has fuel gauge width in pixels
+Line 47 ERROR: Undefined symbol
+00000098  23C5 005455B8             47      move.l  d5, CurrentFuelGaugeWidth
+0000009E  4EB9 000001B8             48      jsr     drawFuelGaugeRectangle                          ; Uses D5 to draw
+Line 49 ERROR: Undefined symbol
+000000A4  23FC 004DBD16 005455D4    49      move.l  #FUEL_GAUGE_WIDTH, LastFuelGaugeWidth           ; Set LastFuelGauge for drawing depleted part
+000000AE  4EB9 000001FC             50      jsr     drawDepletedFuelGauge
+000000B4  4E75                      51      rts
+000000B6                            52      
+000000B6                            53  drawBackgroundAsync:
+000000B6                            54  * Pops the loading screen while drawing background in the other buffer
+000000B6  4EB9 000002DE             55      jsr     drawLoadingImage
+000000BC  4EB9 0000098E             56      jsr     swapBuffers
+000000C2  4EB9 00000900             57      jsr     drawBackgroundImage
+000000C8  4EB9 0000098E             58      jsr     swapBuffers
+000000CE                            59  
+000000CE  4E75                      60      rts
+000000D0                            61      
+000000D0                            62  drawFloatingText:
+000000D0                            63  * Draw all currently active floating texts
+000000D0                            64  * Registers used: D0-D4, A1-A3
+000000D0                            65  
+000000D0                            66  * Loop through IsFloatingTextActive, if it is, then draw it
+Line 67 ERROR: Undefined symbol
+000000D0  45F9 004DBD16             67      lea     IsFloatingTextActive, a2
+Line 68 ERROR: Comma expected
+000000D6                            68      move.l  #MAX_FLOATING_TEXT-1, d3
+000000D6                            69      
+Line 70 ERROR: Symbol value differs between first and second pass
+000000D6                            70  drawFloatingTextLoop:
+Line 71 ERROR: Undefined symbol
+000000D6  0C1A 0016                 71      cmp.b   #FLOATING_TEXT_STATUS_ACTIVE, (a2)+
+000000DA  6600 0068                 72      bne     continueDrawFloatingTextLoop
+000000DE                            73  
+000000DE                            74  * Found an active one, draw
+000000DE  2803                      75      move.l  d3, d4
+Line 76 ERROR: Comma expected
+000000E0                            76      sub.l   #MAX_FLOATING_TEXT-1, d4
+000000E0  4484                      77      neg.l   d4
+000000E2  E58C                      78      lsl.l   #2, d4                              ; Long offset
+000000E4                            79  
+000000E4                            80  * Set font color and properties
+Line 81 ERROR: Undefined symbol
+000000E4  47F9 004DBD16             81      lea     FloatingTextColors, a3
+000000EA  2233 4000                 82      move.l  (a3, d4), d1
+Line 83 ERROR: Undefined symbol
+000000EE  47F9 004DBD16             83      lea     FloatingTextProps, a3
+000000F4  2433 4000                 84      move.l  (a3, d4), d2
+Line 85 ERROR: Undefined symbol
+000000F8  203C 004DBD16             85      move.l  #TASK_SET_FONT, d0
+000000FE  4E4F                      86      trap    #15
+00000100                            87  
+00000100                            88  * Set the background color
+Line 89 ERROR: Undefined symbol
+00000100  223C 004DBD16             89      move.l  #BACKGROUND_COLOR, d1
+Line 90 ERROR: Undefined symbol
+00000106  203C 004DBD16             90      move.l  #TASK_SET_FILL_COLOR, d0
+0000010C  4E4F                      91      trap    #15
+0000010E                            92  
+0000010E                            93  * Get the address of the null-terminated string
+Line 94 ERROR: Undefined symbol
+0000010E  47F9 004DBD16             94      lea     FloatingTextStrAddr, a3
+00000114  2273 4000                 95      move.l  (a3, d4), a1
+00000118                            96      
+00000118                            97  * Get the position
+Line 98 ERROR: Undefined symbol
+00000118  47F9 004DBD16             98      lea     FFloatingTextX, a3
+0000011E  2233 4000                 99      move.l  (a3, d4), d1
+Line 100 ERROR: Undefined symbol
+00000122  EC89                     100      lsr.l   #FRACTIONAL_BITS, d1                ; To integer
+00000124                           101      
+Line 102 ERROR: Undefined symbol
+00000124  47F9 004DBD16            102      lea     FFloatingTextY, a3
+0000012A  2433 4000                103      move.l  (a3, d4), d2
+Line 104 ERROR: Undefined symbol
+0000012E  EC8A                     104      lsr.l   #FRACTIONAL_BITS, d2                ; To integer
+00000130                           105      
+Line 106 ERROR: Undefined symbol
+00000130  203C 004DBD16            106      move.l  #TASK_DRAW_TEXT, d0
+00000136  4E4F                     107      trap    #15
+00000138                           108  
+Line 109 ERROR: Symbol value differs between first and second pass
+00000138                           109  continueDrawFloatingTextLoop:
+00000138  51CB FFA2                110      dbra    d3, drawFloatingTextLoop
+0000013C  4E75                     111      rts
+0000013E                           112      
+Line 113 ERROR: Symbol value differs between first and second pass
+0000013E                           113  setDefaultFont:
+Line 114 ERROR: Undefined symbol
+0000013E  223C 004DBD16            114      move.l  #FONT_COLOR_DEFAULT, d1
+Line 115 ERROR: Undefined symbol
+00000144  243C 004DBD16            115      move.l  #FONT_PROPS_DEFAULT, d2
+Line 116 ERROR: Undefined symbol
+0000014A  203C 004DBD16            116      move.l  #TASK_SET_FONT, d0
+00000150  4E4F                     117      trap    #15
+00000152  4E75                     118      rts
+00000154                           119      
+Line 120 ERROR: Symbol value differs between first and second pass
+00000154                           120  setBackgroundColorAsFill:
+Line 121 ERROR: Undefined symbol
+00000154  223C 004DBD16            121      move.l  #BACKGROUND_COLOR, d1
+Line 122 ERROR: Undefined symbol
+0000015A  203C 004DBD16            122      move.l  #TASK_SET_FILL_COLOR, d0
+00000160  4E4F                     123      trap    #15
+00000162  4E75                     124      rts
+00000164                           125  
+Line 126 ERROR: Symbol value differs between first and second pass
+00000164                           126  drawLivesText:
+00000164                           127  * Draw the word "Lives" underneath the player lives count
+00000164                           128  * Registers used: D0-D2, A1
+00000164  4EB8 014A                129      jsr     setDefaultFont
+00000168  4EB8 0160                130      jsr     setBackgroundColorAsFill
+0000016C                           131      
+0000016C                           132  * Draw the text
+Line 133 ERROR: Undefined symbol
+0000016C  43F9 004DBD16            133      lea     StrLives, a1
+Line 134 ERROR: Undefined symbol
+00000172  223C 004DBD16            134      move.l  #LIVES_TEXT_X, d1
+Line 135 ERROR: Undefined symbol
+00000178  243C 004DBD16            135      move.l  #LIVES_TEXT_Y, d2
+0000017E                           136      
+Line 137 ERROR: Undefined symbol
+0000017E  203C 004DBD16            137      move.l  #TASK_DRAW_TEXT, d0
+00000184  4E4F                     138      trap    #15
+00000186  4E75                     139      rts
+00000188                           140  
+Line 141 ERROR: Symbol value differs between first and second pass
+00000188                           141  drawFuelText:
+00000188                           142  * Draw the word "Fuel" at the fuel gauge
+00000188                           143  * Registers used: D0-D2, A1
+00000188  4EB8 014A                144      jsr     setDefaultFont
+0000018C  4EB8 0160                145      jsr     setBackgroundColorAsFill
+00000190                           146      
+00000190                           147  * Draw the text
+Line 148 ERROR: Undefined symbol
+00000190  43F9 004DBD16            148      lea     StrFuel, a1
+Line 149 ERROR: Undefined symbol
+00000196  223C 004DBD16            149      move.l  #FUEL_TEXT_X, d1
+Line 150 ERROR: Undefined symbol
+0000019C  243C 004DBD16            150      move.l  #FUEL_TEXT_Y, d2
+000001A2                           151      
+Line 152 ERROR: Undefined symbol
+000001A2  203C 004DBD16            152      move.l  #TASK_DRAW_TEXT, d0
+000001A8  4E4F                     153      trap    #15
+000001AA  4E75                     154      rts
+000001AC                           155      
+Line 156 ERROR: Symbol value differs between first and second pass
+000001AC                           156  drawFuelGaugeRectangle:
+000001AC                           157  * Draw the fuel gauge rectangle according to the given parameters. Doesn't draw background.
+000001AC                           158  * Parameters:
+000001AC                           159  * D5: Fuel gauge width
+000001AC                           160  
+000001AC                           161  * Other registers used: D1-D4
+000001AC                           162      
+000001AC                           163  * Reset pen width
+Line 164 ERROR: Undefined symbol
+000001AC  203C 004DBD16            164      move.l  #TASK_SET_PEN_WIDTH, d0
+Line 165 ERROR: Undefined symbol
+000001B2  223C 004DBD16            165      move.l  #DEFAULT_PEN_WIDTH, d1
+000001B8  4E4F                     166      trap    #15
+000001BA                           167  
+000001BA                           168  * Set fuel gauge color
+Line 169 ERROR: Undefined symbol
+000001BA  223C 004DBD16            169      move.l  #FUEL_GAUGE_COLOR, d1
+Line 170 ERROR: Undefined symbol
+000001C0  203C 004DBD16            170      move.l  #TASK_SET_PEN_COLOR, d0
+000001C6  4E4F                     171      trap    #15
+Line 172 ERROR: Undefined symbol
+000001C8  203C 004DBD16            172      move.l  #TASK_SET_FILL_COLOR, d0
+000001CE  4E4F                     173      trap    #15
+000001D0                           174      
+000001D0                           175  * Set rectangle parameters and draw
+Line 176 ERROR: Undefined symbol
+000001D0  223C 004DBD16            176      move.l  #FUEL_GAUGE_X, d1                               ; LeftX
+Line 177 ERROR: Undefined symbol
+000001D6  243C 004DBD16            177      move.l  #FUEL_GAUGE_Y, d2                               ; UpperY
+000001DC  2601                     178      move.l  d1, d3
+000001DE  D685                     179      add.l   d5, d3                                          ; RightX
+Line 180 ERROR: Invalid syntax
+000001E0                           180      move.l  #FUEL_GAUGE_Y+FUEL_GAUGE_HEIGHT, d4             ; LowerY
+000001E0                           181      
+Line 182 ERROR: Undefined symbol
+000001E0  203C 004DBD16            182      move.l  #TASK_DRAW_FILLED_RECTANGLE, d0
+000001E6  4E4F                     183      trap    #15
+000001E8                           184  
+000001E8  4E75                     185      rts
+000001EA                           186  
+Line 187 ERROR: Symbol value differs between first and second pass
+000001EA                           187  drawDepletedFuelGauge:
+000001EA                           188  * Registers used: D0-D4
+000001EA                           189  * Reset pen width
+Line 190 ERROR: Undefined symbol
+000001EA  203C 004DBD16            190      move.l  #TASK_SET_PEN_WIDTH, d0
+Line 191 ERROR: Undefined symbol
+000001F0  223C 004DBD16            191      move.l  #DEFAULT_PEN_WIDTH, d1
+000001F6  4E4F                     192      trap    #15
+000001F8                           193  
+000001F8                           194  * Set fuel gauge color
+Line 195 ERROR: Undefined symbol
+000001F8  223C 004DBD16            195      move.l  #FUEL_GAUGE_DEPLETED_COLOR, d1
+Line 196 ERROR: Undefined symbol
+000001FE  203C 004DBD16            196      move.l  #TASK_SET_PEN_COLOR, d0
+00000204  4E4F                     197      trap    #15
+Line 198 ERROR: Undefined symbol
+00000206  203C 004DBD16            198      move.l  #TASK_SET_FILL_COLOR, d0
+0000020C  4E4F                     199      trap    #15
+0000020E                           200  
+0000020E                           201  * Set rectangle parameters
+Line 202 ERROR: Undefined symbol
+0000020E  2239 004DBD16            202      move.l  CurrentFuelGaugeWidth, d1
+Line 203 ERROR: Undefined symbol
+00000214  0681 004DBD16            203      add.l   #FUEL_GAUGE_X, d1
+0000021A                           204      
+Line 205 ERROR: Undefined symbol
+0000021A  243C 004DBD16            205      move.l  #FUEL_GAUGE_Y, d2
+00000220                           206      
+Line 207 ERROR: Invalid syntax
+00000220                           207      move.l  #FUEL_GAUGE_X+FUEL_GAUGE_WIDTH, d3
+00000220                           208      
+Line 209 ERROR: Invalid syntax
+00000220                           209      move.l  #FUEL_GAUGE_Y+FUEL_GAUGE_HEIGHT, d4
+00000220                           210      
+Line 211 ERROR: Undefined symbol
+00000220  203C 004DBD16            211      move.l  #TASK_DRAW_FILLED_RECTANGLE, d0
+00000226  4E4F                     212      trap    #15
+00000228                           213      
+Line 214 ERROR: Symbol value differs between first and second pass
+00000228                           214  skipDrawingDepleted:
+00000228  4E75                     215      rts
+0000022A                           216      
+Line 217 ERROR: Symbol value differs between first and second pass
+0000022A                           217  drawFuelGauge:
+0000022A                           218  * Fuel gauge function to call in the renderCycle loop.
+0000022A                           219  * Registers used: D0-D5
+Line 220 ERROR: Undefined symbol
+0000022A  23F9 004DBD16 005455B8   220      move.l  CurrentFuelGaugeWidth, LastFuelGaugeWidth
+00000234  4EB9 00000268            221      jsr     getFuelGaugeWidth                               ; D5 has fuel gauge width in pixels
+Line 222 ERROR: Undefined symbol
+0000023A  23C5 005455B8            222      move.l  d5, CurrentFuelGaugeWidth
+00000240  4EB8 01B8                223      jsr     drawFuelGaugeRectangle                          ; Uses D5 to draw
+00000244  4EB8 01FC                224      jsr     drawDepletedFuelGauge                      
+00000248  4E75                     225      rts
+0000024A                           226  
+Line 227 ERROR: Symbol value differs between first and second pass
+0000024A                           227  getFuelGaugeWidth:
+0000024A                           228  * Calculate how many pixels of fuel gauge should be drawn. Doesn't really draw anything.
+0000024A                           229  * Returns:
+0000024A                           230  * D7: Fuel gauge width in pixels
+Line 231 ERROR: Undefined symbol
+0000024A  2A39 004DBD16            231      move.l  CurrentFuel, d5
+Line 232 ERROR: Undefined symbol
+00000250  ED8D                     232      lsl.l   #FRACTIONAL_BITS, d5
+Line 233 ERROR: Undefined symbol
+00000252  8AFC BD16                233      divu    #MAX_FUEL, d5
+00000256  4845                     234      swap    d5
+00000258  3A3C 0000                235      move.w  #0, d5
+0000025C  4845                     236      swap    d5                                              ; D5 contains proportion of fuel in fixed point
+0000025E                           237      
+0000025E                           238  * Calculate how much to draw
+Line 239 ERROR: Undefined symbol
+0000025E  CAFC BD16                239      mulu    #FUEL_GAUGE_WIDTH, d5       ; Calculate width
+Line 240 ERROR: Undefined symbol
+00000262  EC8D                     240      lsr.l   #FRACTIONAL_BITS, d5        ; To integer
+00000264  4E75                     241      rts
+00000266                           242  
+Line 243 ERROR: Symbol value differs between first and second pass
+00000266                           243  setDoubleBuffering:
+00000266                           244  * Registers used: D0, D1
+00000266                           245  
+Line 246 ERROR: Undefined symbol
+00000266  203C 004DBD16            246      move.l  #TASK_SET_DRAWING_MODE, d0
+Line 247 ERROR: Undefined symbol
+0000026C  223C 004DBD16            247      move.l  #DOUBLE_BUFFERING, d1
+00000272  4E4F                     248      trap    #15
+00000274  4E75                     249      rts
+00000276                           250  
+Line 251 ERROR: Symbol value differs between first and second pass
+00000276                           251  setScreenResolution:
+00000276                           252  * Registers used: D0, D1
+00000276                           253  
+Line 254 ERROR: Undefined symbol
+00000276  223C 004DBD16            254      move.l  #WINDOW_WIDTH, d1
+0000027C  4841                     255      swap    d1
+Line 256 ERROR: Undefined symbol
+0000027E  323C BD16                256      move.w  #WINDOW_HEIGHT, d1
+Line 257 ERROR: Undefined symbol
+00000282  203C 004DBD16            257      move.l  #TASK_GET_SET_OUTPUT_WIN, d0
+00000288  4E4F                     258      trap    #15
+0000028A  4E75                     259      rts
+0000028C                           260  
+Line 261 ERROR: Symbol value differs between first and second pass
+0000028C                           261  drawHomeScreenImage:
+0000028C                           262  * Registers used: A1
+0000028C  4EB9 0000092E            263      jsr     clearScreen
+Line 264 ERROR: Undefined symbol
+00000292  43F9 004DBD16            264      lea     HomeScreenImage, a1
+00000298                           265  
+Line 266 ERROR: Undefined symbol
+00000298  9FFC 004DBD16            266      sub.l   #THREE_ARGS_FUNC, sp                    ; Argument stack incremental
+0000029E                           267      
+Line 268 ERROR: Undefined symbol
+0000029E  2F49 55B8                268      move.l  a1, BMP_ADDR(sp)
+Line 269 ERROR: Undefined symbol
+000002A2  2F7C 004DBD16 55B8       269      move.l  #HALF_WINDOW_WIDTH, X_SCREEN(sp)
+Line 270 ERROR: Undefined symbol
+000002AA  2F7C 004DBD16 55B8       270      move.l  #HALF_WINDOW_HEIGHT, Y_SCREEN(sp)
+000002B2                           271      
+Line 272 ERROR: Undefined symbol
+000002B2  4EB9 004DBD16            272      jsr     displayBitmapCenter
+Line 273 ERROR: Undefined symbol
+000002B8  DFFC 004DBD16            273      add.l   #THREE_ARGS_FUNC, sp                    ; Fix stack
+000002BE  4E75                     274      rts
+000002C0                           275      
+Line 276 ERROR: Symbol value differs between first and second pass
+000002C0                           276  drawLoadingImage:
+000002C0                           277  * Registers used: A1
+000002C0                           278  
+000002C0  4EB9 0000092E            279      jsr     clearScreen
+Line 280 ERROR: Undefined symbol
+000002C6  43F9 004DBD16            280      lea     LoadingImage, a1
+000002CC                           281      
+Line 282 ERROR: Undefined symbol
+000002CC  9FFC 004DBD16            282      sub.l   #THREE_ARGS_FUNC, sp
+000002D2                           283      
+Line 284 ERROR: Undefined symbol
+000002D2  2F49 55B8                284      move.l  a1, BMP_ADDR(sp)
+Line 285 ERROR: Undefined symbol
+000002D6  2F7C 004DBD16 55B8       285      move.l  #HALF_WINDOW_WIDTH, X_SCREEN(sp)
+Line 286 ERROR: Undefined symbol
+000002DE  2F7C 004DBD16 55B8       286      move.l  #HALF_WINDOW_HEIGHT, Y_SCREEN(sp)
+000002E6                           287      
+Line 288 ERROR: Undefined symbol
+000002E6  4EB9 004DBD16            288      jsr     displayBitmapCenter
+Line 289 ERROR: Undefined symbol
+000002EC  DFFC 004DBD16            289      add.l   #THREE_ARGS_FUNC, sp
+000002F2  4E75                     290      rts
+000002F4                           291      
+Line 292 ERROR: Symbol value differs between first and second pass
+000002F4                           292  drawGameOverImage:
+000002F4                           293  * Registers used: A1
+000002F4  4EB9 0000092E            294      jsr     clearScreen
+Line 295 ERROR: Undefined symbol
+000002FA  43F9 004DBD16            295      lea     GameOverImage, a1
+00000300                           296      
+Line 297 ERROR: Undefined symbol
+00000300  9FFC 004DBD16            297      sub.l   #THREE_ARGS_FUNC, sp
+00000306                           298      
+Line 299 ERROR: Undefined symbol
+00000306  2F49 55B8                299      move.l  a1, BMP_ADDR(sp)
+Line 300 ERROR: Undefined symbol
+0000030A  2F7C 004DBD16 55B8       300      move.l  #HALF_WINDOW_WIDTH, X_SCREEN(sp)
+Line 301 ERROR: Undefined symbol
+00000312  2F7C 004DBD16 55B8       301      move.l  #HALF_WINDOW_HEIGHT, Y_SCREEN(sp)
+0000031A                           302      
+Line 303 ERROR: Undefined symbol
+0000031A  4EB9 004DBD16            303      jsr     displayBitmapCenter
+Line 304 ERROR: Undefined symbol
+00000320  DFFC 004DBD16            304      add.l   #THREE_ARGS_FUNC, sp
+00000326  4E75                     305      rts
+00000328                           306  
+Line 307 ERROR: Symbol value differs between first and second pass
+00000328                           307  drawPlayer:
+00000328                           308  * Registers used: D0, D1, A1
+00000328                           309  * Could optimized further: If the player didn't move, we don't redraw
+00000328                           310  * Check if the player is invul
+Line 311 ERROR: Undefined symbol
+00000328  0CB9 00000000 005455B8   311      cmp.l   #0, PlayerInvulTime
+00000332  6F00 0064                312      ble     drawPlayerSpriteActive
+00000336                           313  
+00000336                           314  * Here, the player is invul, see if the blink timer is >= 0 or not.
+00000336                           315  * If it is, then decrease the timer
+00000336                           316  * If it isn't, then switch player sprite's visibility and reset the blinking time
+Line 317 ERROR: Undefined symbol
+00000336  0CB9 00000000 005455B8   317      cmp.l   #0, PlayerBlinkTime
+00000340  6F00 0030                318      ble     switchPlayerSpriteVisibility
+00000344                           319  
+00000344                           320  * Decrease the blink timer normally here
+Line 321 ERROR: Undefined symbol
+00000344  2039 004DBD16            321      move.l  DeltaTime, d0
+Line 322 ERROR: Undefined symbol
+0000034A  91B9 005455B8            322      sub.l   d0, PlayerBlinkTime
+00000350  6000 003A                323      bra     checkPlayerSpriteVisibility
+00000354                           324  
+Line 325 ERROR: Symbol value differs between first and second pass
+00000354                           325  switchPlayerSpriteVisibility:
+00000354                           326  * -1 then neg is a way to switch from true to false and vise versa
+Line 327 ERROR: Undefined symbol
+00000354  1039 004DBD16            327      move.b  PlayerSpriteActive, d0
+0000035A  5300                     328      sub.b   #1, d0
+0000035C  4400                     329      neg.b   d0
+Line 330 ERROR: Undefined symbol
+0000035E  13C0 005455B8            330      move.b  d0, PlayerSpriteActive
+00000364                           331  
+00000364                           332  * Reset blinking time
+Line 333 ERROR: Undefined symbol
+00000364  23FC 004DBD16 005455B8   333      move.l  #PLAYER_BLINK_TIME, PlayerBlinkTime
+0000036E                           334      
+Line 335 ERROR: Symbol value differs between first and second pass
+0000036E                           335  checkPlayerSpriteVisibility:
+Line 336 ERROR: Undefined symbol
+0000036E  0C39 0016 005455B8       336      cmp.b   #TRUE, PlayerSpriteActive
+00000376  6600 008C                337      bne     skipDrawingPlayer
+0000037A                           338   
+Line 339 ERROR: Symbol value differs between first and second pass
+0000037A                           339  drawPlayerSpriteActive:
+Line 340 ERROR: Undefined symbol
+0000037A  43F9 004DBD16            340      lea     PlayerSprites, a1
+00000380                           341      
+00000380  4280                     342      clr.l   d0
+Line 343 ERROR: Undefined symbol
+00000382  1039 004DBD16            343      move.b  CurrentPlayerFrame, d0  ; Get the frame index (long offset)
+00000388                           344      
+Line 345 ERROR: Undefined symbol
+00000388  9FFC 004DBD16            345      sub.l   #THREE_ARGS_FUNC, sp
+Line 346 ERROR: Undefined symbol
+0000038E  2F71 0000 55D8           346      move.l  (a1, d0), BMP_ADDR(sp)  ; Load the correct image by frame index
+00000394                           347      
+00000394                           348  * Check if it's the time to switch the sprite
+Line 349 ERROR: Undefined symbol
+00000394  4EB9 004DBD16            349      jsr     getTimeSinceMidnight            ; D1 contains time now
+0000039A  2401                     350      move.l  d1, d2
+Line 351 ERROR: Undefined symbol
+0000039C  94B9 004DBD16            351      sub.l   TimeSinceLastPlayerFrame, d2
+Line 352 ERROR: Undefined symbol
+000003A2  B4BC 004DBD16            352      cmp.l   #PLAYER_FRAME_DELAY, d2
+000003A8  6D00 002A                353      blt     skipPlayerFrame
+000003AC                           354  
+Line 355 ERROR: Undefined symbol
+000003AC  0600 0016                355      add.b   #LONG_OFFSET, d0                ; Move to the next frame
+000003B0                           356      
+Line 357 ERROR: Undefined symbol
+000003B0  23C1 005455D4            357      move.l  d1, TimeSinceLastPlayerFrame    ; Mark that we just switch frame
+000003B6                           358      
+Line 359 ERROR: Symbol value differs between first and second pass
+000003B6                           359  skipPlayerFrame:
+Line 360 ERROR: Invalid syntax
+000003B6                           360      divu    #PLAYER_FRAME_COUNT*LONG_OFFSET, d0
+000003B6  4840                     361      swap    d0                      ; Get the remainder, modulo operator basically
+Line 362 ERROR: Undefined symbol
+000003B8  13C0 005455D0            362      move.b  d0, CurrentPlayerFrame  ; Save the frame index back
+000003BE                           363      
+Line 364 ERROR: Undefined symbol
+000003BE  2039 004DBD16            364      move.l  FPlayerX, d0
+Line 365 ERROR: Undefined symbol
+000003C4  EC88                     365      lsr.l   #FRACTIONAL_BITS, d0
+Line 366 ERROR: Undefined symbol
+000003C6  2F40 55C8                366      move.l  d0, X_SCREEN(sp)        ; Turn into integer
+000003CA                           367          
+Line 368 ERROR: Undefined symbol
+000003CA  2039 004DBD16            368      move.l  FPlayerY, d0
+Line 369 ERROR: Undefined symbol
+000003D0  EC88                     369      lsr.l   #FRACTIONAL_BITS, d0
+Line 370 ERROR: Undefined symbol
+000003D2  2F40 55B8                370      move.l  d0, Y_SCREEN(sp)
+000003D6                           371      
+Line 372 ERROR: Undefined symbol
+000003D6  4EB9 004DBD16            372      jsr     displayTransparentBitmap
+Line 373 ERROR: Undefined symbol
+000003DC  DFFC 004DBD16            373      add.l   #THREE_ARGS_FUNC, sp
+000003E2                           374      
+Line 375 ERROR: Symbol value differs between first and second pass
+000003E2                           375  skipDrawingPlayer:
+000003E2  4E75                     376      rts
+000003E4                           377  
+Line 378 ERROR: Symbol value differs between first and second pass
+000003E4                           378  drawEnemies:
+000003E4                           379  * Registers used: D0-D6, A1-A3
+000003E4                           380  * Loop through the alive array to see if the enemy needs to be drawn
+000003E4  7AFF                     381      move.l  #-1, d5
+Line 382 ERROR: Undefined symbol
+000003E6  45F9 004DBD16            382      lea     IsEnemyAlive, a2
+000003EC                           383  
+Line 384 ERROR: Symbol value differs between first and second pass
+000003EC                           384  checkAliveEnemyDrawEnemiesLoop:
+000003EC  5285                     385      add.l   #1, d5
+000003EE                           386      
+Line 387 ERROR: Undefined symbol
+000003EE  BABC 004DBD16            387      cmp.l   #MAX_ENEMY_ALLOWED, d5
+000003F4  6C00 008A                388      bge     skipEnemyDrawing
+000003F8                           389      
+Line 390 ERROR: Undefined symbol
+000003F8  0C32 0016 5000           390      cmp.b   #ENEMY_STATUS_ALIVE, (a2, d5)
+000003FE  6700 0026                391      beq     drawEnemy
+00000402                           392      
+00000402  600A                     393      bra     checkAliveEnemyDrawEnemiesLoop
+00000404                           394      
+Line 395 ERROR: Symbol value differs between first and second pass
+00000404                           395  drawEnemy:
+00000404  2C05                     396      move.l  d5, d6
+00000406  E58E                     397      lsl.l   #2, d6                      ; Long offset
+00000408                           398      
+00000408                           399  * Actually draw enemy here
+00000408                           400  * Pen width
+Line 401 ERROR: Undefined symbol
+00000408  203C 004DBD16            401      move.l  #TASK_SET_PEN_WIDTH, d0
+Line 402 ERROR: Undefined symbol
+0000040E  223C 004DBD16            402      move.l  #DEFAULT_PEN_WIDTH, d1
+00000414  4E4F                     403      trap    #15
+00000416                           404      
+00000416                           405  * Color depends on type
+Line 406 ERROR: Undefined symbol
+00000416  47F9 004DBD16            406      lea     EnemyTypes, a3
+0000041C  4284                     407      clr.l   d4
+0000041E  1833 5000                408      move.b  (a3, d5), d4                ; D4 contains enemy type
+00000422  E58C                     409      lsl.l   #2, d4                      ; Long offset
+00000424                           410      
+Line 411 ERROR: Undefined symbol
+00000424  47F9 004DBD16            411      lea     EnemyColors, a3
+Line 412 ERROR: Undefined symbol
+0000042A  23F3 4000 005455CC       412      move.l  (a3, d4), EnemyColorArg     ; Lookup for corresponding color
+00000432                           413  
+00000432                           414  * Position
+Line 415 ERROR: Undefined symbol
+00000432  47F9 004DBD16            415      lea     FEnemyPosX, a3
+00000438  2233 6000                416      move.l  (a3, d6), d1
+Line 417 ERROR: Undefined symbol
+0000043C  EC89                     417      lsr.l   #FRACTIONAL_BITS, d1
+Line 418 ERROR: Undefined symbol
+0000043E  23C1 005455B8            418      move.l  d1, EnemyLeftXArg
+00000444                           419  
+Line 420 ERROR: Undefined symbol
+00000444  47F9 004DBD16            420      lea     FEnemyPosY, a3
+0000044A  2433 6000                421      move.l  (a3, d6), d2
+Line 422 ERROR: Undefined symbol
+0000044E  EC8A                     422      lsr.l   #FRACTIONAL_BITS, d2
+Line 423 ERROR: Undefined symbol
+00000450  23C2 005455B8            423      move.l  d2, EnemyUpperYArg
+00000456                           424  
+00000456  4EB9 00000482            425      jsr     renderEnemy
+0000045C                           426      
+0000045C  60B0                     427      bra     checkAliveEnemyDrawEnemiesLoop  ; Branch back to see if there's any more to draw
+0000045E                           428      
+Line 429 ERROR: Symbol value differs between first and second pass
+0000045E                           429  skipEnemyDrawing:
+0000045E  4E75                     430      rts
+00000460                           431      
+Line 432 ERROR: Symbol value differs between first and second pass
+00000460                           432  renderEnemy:
+00000460                           433  * This is where enemy's shapes take place
+Line 434 ERROR: Invalid syntax
+00000460                           434      sub.l   #LONG_OFFSET*7, sp
+00000460  48D7 007F                435      movem.l d0-d6, (sp)
+00000464                           436  
+00000464                           437  * Set color
+Line 438 ERROR: Undefined symbol
+00000464  2239 004DBD16            438      move.l  EnemyColorArg, d1
+Line 439 ERROR: Undefined symbol
+0000046A  203C 004DBD16            439      move.l  #TASK_SET_PEN_COLOR, d0
+00000470  4E4F                     440      trap    #15
+Line 441 ERROR: Undefined symbol
+00000472  203C 004DBD16            441      move.l  #TASK_SET_FILL_COLOR, d0
+00000478  4E4F                     442      trap    #15
+0000047A                           443  
+0000047A                           444  * Draw the head
+0000047A                           445  * Head is made of 3 overlapping rectangles to construct an artificial curve
+0000047A                           446  * Draw flattest rectangle
+Line 447 ERROR: Undefined symbol
+0000047A  2239 004DBD16            447      move.l  EnemyLeftXArg, d1
+Line 448 ERROR: Undefined symbol
+00000480  2439 004DBD16            448      move.l  EnemyUpperYArg, d2
+Line 449 ERROR: Undefined symbol
+00000486  0682 004DBD16            449      add.l   #2*ENEMY_HEAD_STEP, d2
+0000048C  2601                     450      move.l  d1, d3
+Line 451 ERROR: Undefined symbol
+0000048E  0683 004DBD16            451      add.l   #ENEMY_SIZE_X, d3
+00000494  2802                     452      move.l  d2, d4
+Line 453 ERROR: Comma expected
+00000496                           453      add.l   #ENEMY_HEAD_HEIGHT-2*ENEMY_HEAD_STEP, d4
+Line 454 ERROR: Undefined symbol
+00000496  203C 004DBD16            454      move.l  #TASK_DRAW_FILLED_RECTANGLE, d0
+0000049C  4E4F                     455      trap    #15
+0000049E                           456      
+0000049E                           457  * Draw the middle rectangle
+Line 458 ERROR: Undefined symbol
+0000049E  2239 004DBD16            458      move.l  EnemyLeftXArg, d1
+Line 459 ERROR: Undefined symbol
+000004A4  0681 004DBD16            459      add.l   #ENEMY_HEAD_STEP, d1
+Line 460 ERROR: Undefined symbol
+000004AA  2439 004DBD16            460      move.l  EnemyUpperYArg, d2
+Line 461 ERROR: Undefined symbol
+000004B0  0682 004DBD16            461      add.l   #ENEMY_HEAD_STEP, d2
+000004B6  2601                     462      move.l  d1, d3
+Line 463 ERROR: Comma expected
+000004B8                           463      add.l   #ENEMY_SIZE_X-2*ENEMY_HEAD_STEP, d3
+000004B8  2802                     464      move.l  d2, d4
+Line 465 ERROR: Comma expected
+000004BA                           465      add.l   #ENEMY_HEAD_HEIGHT-ENEMY_HEAD_STEP, d4
+Line 466 ERROR: Undefined symbol
+000004BA  203C 004DBD16            466      move.l  #TASK_DRAW_FILLED_RECTANGLE, d0
+000004C0  4E4F                     467      trap    #15
+000004C2                           468  
+000004C2                           469  * Draw tallest rectangle
+Line 470 ERROR: Undefined symbol
+000004C2  2239 004DBD16            470      move.l  EnemyLeftXArg, d1
+Line 471 ERROR: Undefined symbol
+000004C8  0681 004DBD16            471      add.l   #2*ENEMY_HEAD_STEP, d1
+Line 472 ERROR: Undefined symbol
+000004CE  2439 004DBD16            472      move.l  EnemyUpperYArg, d2
+000004D4  2601                     473      move.l  d1, d3
+Line 474 ERROR: Comma expected
+000004D6                           474      add.l   #ENEMY_SIZE_X-4*ENEMY_HEAD_STEP, d3
+000004D6  2802                     475      move.l  d2, d4
+Line 476 ERROR: Undefined symbol
+000004D8  0684 004DBD16            476      add.l   #ENEMY_HEAD_HEIGHT, d4
+Line 477 ERROR: Undefined symbol
+000004DE  203C 004DBD16            477      move.l  #TASK_DRAW_FILLED_RECTANGLE, d0
+000004E4  4E4F                     478      trap    #15
+000004E6                           479      
+000004E6                           480  * Draw the tentacle
+Line 481 ERROR: Comma expected
+000004E6                           481      move.l  #ENEMY_TENTACLE_COUNT-1, d5
+000004E6                           482      
+Line 483 ERROR: Symbol value differs between first and second pass
+000004E6                           483  renderEnemyTentacle:
+Line 484 ERROR: Undefined symbol
+000004E6  2239 004DBD16            484      move.l  EnemyLeftXArg, d1
+000004EC  2C05                     485      move.l  d5, d6
+Line 486 ERROR: Invalid syntax
+000004EE                           486      muls    #ENEMY_TENTACLE_WIDTH+ENEMY_TENTACLE_GAP, d6
+000004EE  D286                     487      add.l   d6, d1
+Line 488 ERROR: Undefined symbol
+000004F0  2439 004DBD16            488      move.l  EnemyUpperYArg, d2
+Line 489 ERROR: Undefined symbol
+000004F6  0682 004DBD16            489      add.l   #ENEMY_HEAD_HEIGHT, d2
+000004FC  2601                     490      move.l  d1, d3
+Line 491 ERROR: Undefined symbol
+000004FE  0683 004DBD16            491      add.l   #ENEMY_TENTACLE_WIDTH, d3
+00000504  2802                     492      move.l  d2, d4
+Line 493 ERROR: Undefined symbol
+00000506  0684 004DBD16            493      add.l   #ENEMY_TENTACLE_HEIGHT, d4
+Line 494 ERROR: Undefined symbol
+0000050C  203C 004DBD16            494      move.l  #TASK_DRAW_FILLED_RECTANGLE, d0
+00000512  4E4F                     495      trap    #15
+00000514                           496      
+00000514  51CD 0016                497      dbra    d5, renderEnemyTentacle
+00000518                           498      
+00000518                           499  * Draw the left eye
+00000518                           500  * Set color
+Line 501 ERROR: Undefined symbol
+00000518  223C 004DBD16            501      move.l  #ENEMY_EYE_COLOR, d1
+Line 502 ERROR: Undefined symbol
+0000051E  203C 004DBD16            502      move.l  #TASK_SET_PEN_COLOR, d0
+00000524  4E4F                     503      trap    #15
+Line 504 ERROR: Undefined symbol
+00000526  203C 004DBD16            504      move.l  #TASK_SET_FILL_COLOR, d0
+0000052C  4E4F                     505      trap    #15
+0000052E                           506      
+0000052E                           507  * Set dimension
+Line 508 ERROR: Undefined symbol
+0000052E  2239 004DBD16            508      move.l  EnemyLeftXArg, d1
+Line 509 ERROR: Invalid syntax
+00000534                           509      add.l   #ENEMY_SIZE_X>>1-ENEMY_EYE_GAP>>1-ENEMY_EYE_SIZE, d1
+Line 510 ERROR: Undefined symbol
+00000534  2439 004DBD16            510      move.l  EnemyUpperYArg, d2
+Line 511 ERROR: Undefined symbol
+0000053A  0682 004DBD16            511      add.l   #ENEMY_EYE_OFFSET_Y, d2
+00000540  2601                     512      move.l  d1, d3
+Line 513 ERROR: Undefined symbol
+00000542  0683 004DBD16            513      add.l   #ENEMY_EYE_SIZE, d3
+00000548  2802                     514      move.l  d2, d4
+Line 515 ERROR: Undefined symbol
+0000054A  0684 004DBD16            515      add.l   #ENEMY_EYE_SIZE, d4
+Line 516 ERROR: Undefined symbol
+00000550  203C 004DBD16            516      move.l  #TASK_DRAW_FILLED_ELLIPSE, d0
+00000556  4E4F                     517      trap    #15
+00000558                           518      
+00000558                           519  * Right eye (Changes only d1, d3)
+Line 520 ERROR: Invalid syntax
+00000558                           520      add.l   #ENEMY_EYE_GAP+ENEMY_EYE_SIZE, d1
+00000558  2601                     521      move.l  d1, d3
+Line 522 ERROR: Undefined symbol
+0000055A  0683 004DBD16            522      add.l   #ENEMY_EYE_SIZE, d3
+00000560  4E4F                     523      trap    #15
+00000562                           524      
+00000562  4CD7 007F                525      movem.l (sp), d0-d6
+Line 526 ERROR: Invalid syntax
+00000566                           526      add.l   #LONG_OFFSET*7, sp
+00000566                           527      
+00000566                           528  * Left iris
+00000566                           529  * Set color
+Line 530 ERROR: Undefined symbol
+00000566  223C 004DBD16            530      move.l  #ENEMY_IRIS_COLOR, d1
+Line 531 ERROR: Undefined symbol
+0000056C  203C 004DBD16            531      move.l  #TASK_SET_PEN_COLOR, d0
+00000572  4E4F                     532      trap    #15
+Line 533 ERROR: Undefined symbol
+00000574  203C 004DBD16            533      move.l  #TASK_SET_FILL_COLOR, d0
+0000057A  4E4F                     534      trap    #15
+0000057C                           535  * Set dimension
+Line 536 ERROR: Undefined symbol
+0000057C  2239 004DBD16            536      move.l  EnemyLeftXArg, d1
+Line 537 ERROR: Invalid syntax
+00000582                           537      add.l   #ENEMY_SIZE_X>>1-ENEMY_EYE_GAP>>1-ENEMY_EYE_SIZE, d1
+Line 538 ERROR: Undefined symbol
+00000582  2439 004DBD16            538      move.l  EnemyUpperYArg, d2
+Line 539 ERROR: Invalid syntax
+00000588                           539      add.l   #ENEMY_EYE_OFFSET_Y+(ENEMY_EYE_SIZE-ENEMY_IRIS_SIZE)>>1, d2
+00000588  2601                     540      move.l  d1, d3
+Line 541 ERROR: Undefined symbol
+0000058A  0683 004DBD16            541      add.l   #ENEMY_IRIS_SIZE, d3
+00000590  2802                     542      move.l  d2, d4
+Line 543 ERROR: Undefined symbol
+00000592  0684 004DBD16            543      add.l   #ENEMY_IRIS_SIZE, d4
+Line 544 ERROR: Undefined symbol
+00000598  203C 004DBD16            544      move.l  #TASK_DRAW_FILLED_ELLIPSE, d0
+0000059E  4E4F                     545      trap    #15
+000005A0                           546  
+000005A0                           547  * Right iris (Changes only d1, d3)
+Line 548 ERROR: Invalid syntax
+000005A0                           548      add.l   #ENEMY_EYE_GAP+ENEMY_EYE_SIZE, d1
+000005A0  2601                     549      move.l  d1, d3
+Line 550 ERROR: Undefined symbol
+000005A2  0683 004DBD16            550      add.l   #ENEMY_IRIS_SIZE, d3
+000005A8  4E4F                     551      trap    #15
+000005AA                           552      
+000005AA  4E75                     553      rts
+000005AC                           554      
+Line 555 ERROR: Symbol value differs between first and second pass
+000005AC                           555  drawPlayerProjectiles:
+000005AC                           556  * Registers used: D0-D6, A1-A3
+000005AC                           557  * Loop through the projectile active array to see if there's any projectile to draw
+000005AC  7CFF                     558      move.l  #-1, d6
+Line 559 ERROR: Undefined symbol
+000005AE  43F9 004DBD16            559      lea     IsProjectileActive, a1
+000005B4                           560      
+Line 561 ERROR: Symbol value differs between first and second pass
+000005B4                           561  checkActiveDrawProjectileLoop:
+000005B4  5286                     562      add.l   #1, d6
+000005B6                           563      
+Line 564 ERROR: Undefined symbol
+000005B6  BCBC 004DBD16            564      cmp.l   #MAX_PLAYER_PROJECTILE, d6
+000005BC  6C00 00D6                565      bge     skipPlayerProjectileDrawing ; Exceed the size of the array, return
+000005C0                           566      
+Line 567 ERROR: Undefined symbol
+000005C0  0C31 0016 6000           567      cmp.b   #PLAYER_PROJ_STATUS_ACTIVE, (a1, d6)
+000005C6  6700 0072                568      beq     drawPlayerProjectile
+000005CA                           569      
+000005CA  6056                     570      bra     checkActiveDrawProjectileLoop
+000005CC                           571      
+Line 572 ERROR: Symbol value differs between first and second pass
+000005CC                           572  drawPlayerProjectile:
+000005CC  2A06                     573      move.l  d6, d5
+000005CE  E58D                     574      lsl.l   #2, d5                      ; Long offset
+000005D0                           575      
+000005D0                           576  * Projectile is a rectangle with these parameters:
+000005D0                           577  * LeftX = ProjectilePosX
+000005D0                           578  * UpperY = ProjectilePosY
+000005D0                           579  * RightX = ProjectilePosX + ProjectileSizeX
+000005D0                           580  * LowerY = ProjectilePosY + ProjectileSizeY
+000005D0                           581  
+000005D0                           582      * Pen width
+Line 583 ERROR: Undefined symbol
+000005D0  203C 004DBD16            583      move.l  #TASK_SET_PEN_WIDTH, d0
+Line 584 ERROR: Undefined symbol
+000005D6  223C 004DBD16            584      move.l  #DEFAULT_PEN_WIDTH, d1
+000005DC  4E4F                     585      trap    #15
+000005DE                           586  
+Line 587 ERROR: Undefined symbol
+000005DE  203C 004DBD16            587      move.l  #TASK_SET_PEN_COLOR, d0
+Line 588 ERROR: Undefined symbol
+000005E4  223C 004DBD16            588      move.l  #PLAYER_PROJECTILE_COLOR, d1
+000005EA  4E4F                     589      trap    #15
+000005EC                           590      
+Line 591 ERROR: Undefined symbol
+000005EC  203C 004DBD16            591      move.l  #TASK_SET_FILL_COLOR, d0
+000005F2  4E4F                     592      trap    #15                         ; Same color as above
+000005F4                           593  
+Line 594 ERROR: Undefined symbol
+000005F4  45F9 004DBD16            594      lea     FProjectilePosX, a2
+Line 595 ERROR: Undefined symbol
+000005FA  47F9 004DBD16            595      lea     FProjectilePosY, a3
+00000600                           596  
+00000600  2232 5000                597      move.l  (a2, d5), d1                ; LeftX
+Line 598 ERROR: Undefined symbol
+00000604  EC89                     598      lsr.l   #FRACTIONAL_BITS, d1        ; Turn to integer
+00000606                           599      
+00000606  2433 5000                600      move.l  (a3, d5), d2                ; UpperY
+Line 601 ERROR: Undefined symbol
+0000060A  EC8A                     601      lsr.l   #FRACTIONAL_BITS, d2        ; Turn to integer
+0000060C                           602      
+0000060C  2601                     603      move.l  d1, d3
+Line 604 ERROR: Undefined symbol
+0000060E  0683 004DBD16            604      add.l   #PLAYER_PROJECTILE_SIZE_X, d3      ; RightX
+00000614                           605      
+00000614  2802                     606      move.l  d2, d4
+Line 607 ERROR: Undefined symbol
+00000616  0684 004DBD16            607      add.l   #PLAYER_PROJECTILE_SIZE_Y, d4      ; LowerY
+0000061C                           608      
+Line 609 ERROR: Undefined symbol
+0000061C  203C 004DBD16            609      move.l  #TASK_DRAW_FILLED_RECTANGLE, d0
+00000622  4E4F                     610      trap    #15
+00000624                           611      
+00000624  60FC                     612      bra     checkActiveDrawProjectileLoop
+00000626                           613      
+Line 614 ERROR: Symbol value differs between first and second pass
+00000626                           614  skipPlayerProjectileDrawing:
+00000626  4E75                     615      rts
+00000628                           616      
+Line 617 ERROR: Symbol value differs between first and second pass
+00000628                           617  drawEnemyProjectiles:
+00000628                           618  * Registers used: D0-D6, A1-A3
+00000628                           619  * Loop through the enemy projectile active array to see if there's any projectile to draw
+00000628  7CFF                     620      move.l  #-1, d6
+Line 621 ERROR: Undefined symbol
+0000062A  43F9 004DBD16            621      lea     IsEnemyProjectileActive, a1
+00000630                           622      
+Line 623 ERROR: Symbol value differs between first and second pass
+00000630                           623  checkEnemyDrawProjectileLoop:
+00000630  5286                     624      add.l   #1, d6
+00000632                           625      
+Line 626 ERROR: Undefined symbol
+00000632  BCBC 004DBD16            626      cmp.l   #MAX_ENEMY_PROJECTILE, d6
+00000638  6C00 00DC                627      bge     skipEnemyProjectileDrawing  ; Exceed the size of the array, return
+0000063C                           628      
+Line 629 ERROR: Undefined symbol
+0000063C  0C31 0016 6000           629      cmp.b   #ENEMY_PROJ_STATUS_ACTIVE, (a1, d6)
+00000642  6700 0072                630      beq     drawEnemyProjectile
+00000646                           631      
+00000646  6056                     632      bra     checkEnemyDrawProjectileLoop
+00000648                           633      
+Line 634 ERROR: Symbol value differs between first and second pass
+00000648                           634  drawEnemyProjectile:
+00000648  2A06                     635      move.l  d6, d5
+0000064A  E58D                     636      lsl.l   #2, d5                      ; Long offset
+0000064C                           637      
+0000064C                           638  * Projectile is a double-layered circle
+Line 639 ERROR: Undefined symbol
+0000064C  203C 004DBD16            639      move.l  #TASK_SET_PEN_WIDTH, d0
+Line 640 ERROR: Undefined symbol
+00000652  223C 004DBD16            640      move.l  #ENEMY_PROJECTILE_OUTER_SIZE, d1
+00000658  4E4F                     641      trap    #15
+0000065A                           642  
+Line 643 ERROR: Undefined symbol
+0000065A  203C 004DBD16            643      move.l  #TASK_SET_PEN_COLOR, d0
+Line 644 ERROR: Undefined symbol
+00000660  223C 004DBD16            644      move.l  #ENEMY_PROJECTILE_COLOR_OUTER, d1
+00000666  4E4F                     645      trap    #15
+00000668                           646      
+Line 647 ERROR: Undefined symbol
+00000668  203C 004DBD16            647      move.l  #TASK_SET_FILL_COLOR, d0
+Line 648 ERROR: Undefined symbol
+0000066E  223C 004DBD16            648      move.l  #ENEMY_PROJECTILE_COLOR_INNER, d1
+00000674  4E4F                     649      trap    #15
+00000676                           650  
+Line 651 ERROR: Undefined symbol
+00000676  45F9 004DBD16            651      lea     FEnemyProjectileX, a2
+Line 652 ERROR: Undefined symbol
+0000067C  47F9 004DBD16            652      lea     FEnemyProjectileY, a3
+00000682                           653  
+00000682  2232 5000                654      move.l  (a2, d5), d1                ; LeftX
+Line 655 ERROR: Undefined symbol
+00000686  EC89                     655      lsr.l   #FRACTIONAL_BITS, d1        ; Turn to integer
+00000688                           656      
+00000688  2433 5000                657      move.l  (a3, d5), d2                ; UpperY
+Line 658 ERROR: Undefined symbol
+0000068C  EC8A                     658      lsr.l   #FRACTIONAL_BITS, d2        ; Turn to integer
+0000068E                           659      
+0000068E  2601                     660      move.l  d1, d3
+Line 661 ERROR: Undefined symbol
+00000690  0683 004DBD16            661      add.l   #ENEMY_PROJECTILE_SIZE, d3      ; RightX
+00000696                           662      
+00000696  2802                     663      move.l  d2, d4
+Line 664 ERROR: Undefined symbol
+00000698  0684 004DBD16            664      add.l   #ENEMY_PROJECTILE_SIZE, d4      ; LowerY
+0000069E                           665      
+Line 666 ERROR: Undefined symbol
+0000069E  203C 004DBD16            666      move.l  #TASK_DRAW_FILLED_ELLIPSE, d0
+000006A4  4E4F                     667      trap    #15
+000006A6                           668      
+000006A6  60F6                     669      bra     checkEnemyDrawProjectileLoop
+000006A8                           670      
+Line 671 ERROR: Symbol value differs between first and second pass
+000006A8                           671  skipEnemyProjectileDrawing:
+000006A8  4E75                     672      rts
+000006AA                           673  
+Line 674 ERROR: Symbol value differs between first and second pass
+000006AA                           674  drawEnemyProjectilesBGTrail:
+000006AA                           675  * Enemy projectiles can fall through the background area
+000006AA                           676  * So we need to check if it is, and redraw them accordingly
+000006AA                           677  * Registers used: D0-D6, A1-A3
+000006AA                           678  * Loop through the enemy projectile active array to see if there's anything needs to be covered
+000006AA  7CFF                     679      move.l  #-1, d6
+Line 680 ERROR: Undefined symbol
+000006AC  43F9 004DBD16            680      lea     IsEnemyProjectileActive, a1
+000006B2                           681      
+Line 682 ERROR: Symbol value differs between first and second pass
+000006B2                           682  checkBGEnemyProjectileLoop:
+000006B2  5286                     683      add.l   #1, d6
+000006B4                           684      
+Line 685 ERROR: Undefined symbol
+000006B4  BCBC 004DBD16            685      cmp.l   #MAX_ENEMY_PROJECTILE, d6
+000006BA  6C00 0100                686      bge     skipBGEnemyProjectileDrawing  ; Exceed the size of the array, return
+000006BE                           687      
+Line 688 ERROR: Undefined symbol
+000006BE  0C31 0016 6000           688      cmp.b   #ENEMY_PROJ_STATUS_ACTIVE, (a1, d6)
+000006C4  6700 0072                689      beq     drawBGEnemyProjectile
+000006C8                           690      
+000006C8  6056                     691      bra     checkBGEnemyProjectileLoop
+000006CA                           692      
+Line 693 ERROR: Symbol value differs between first and second pass
+000006CA                           693  drawBGEnemyProjectile:
+000006CA  2A06                     694      move.l  d6, d5
+000006CC  E58D                     695      lsl.l   #2, d5                      ; Long offset
+000006CE                           696      
+Line 697 ERROR: Undefined symbol
+000006CE  45F9 004DBD16            697      lea     FEnemyProjectileX, a2
+Line 698 ERROR: Undefined symbol
+000006D4  47F9 004DBD16            698      lea     FEnemyProjectileY, a3
+000006DA                           699  
+000006DA  2232 5000                700      move.l  (a2, d5), d1                ; LeftX
+Line 701 ERROR: Undefined symbol
+000006DE  EC89                     701      lsr.l   #FRACTIONAL_BITS, d1        ; Turn to integer
+Line 702 ERROR: Invalid syntax
+000006E0                           702      sub.l   #ENEMY_PROJECTILE_OUTER_SIZE>>1, d1
+000006E0                           703      
+000006E0  2433 5000                704      move.l  (a3, d5), d2                ; UpperY
+Line 705 ERROR: Undefined symbol
+000006E4  EC8A                     705      lsr.l   #FRACTIONAL_BITS, d2        ; Turn to integer
+Line 706 ERROR: Invalid syntax
+000006E6                           706      sub.l   #ENEMY_PROJECTILE_OUTER_SIZE>>1, d2
+000006E6                           707      
+000006E6                           708  * Only draw BG if it's in the BG area
+000006E6                           709  * Aka ProjectileY >= WindowHeight - BackgroundSize - ENEMY_PROJECTILE_RADIUS
+Line 710 ERROR: Comma expected
+000006E6                           710      cmp.l   #WINDOW_HEIGHT-BACKGROUND_HEIGHT-ENEMY_PROJECTILE_SIZE-ENEMY_PROJECTILE_OUTER_SIZE, d2
+000006E6  6D00 00D0                711      blt     loopBackBGEnemyProjectile
+000006EA                           712      
+000006EA                           713  ***** Start draw bitmap chunk context *****
+000006EA                           714      
+Line 715 ERROR: Invalid syntax
+000006EA                           715      sub.l   #LONG_OFFSET*15, sp
+Line 716 ERROR: Undefined symbol
+000006EA                           716      movem.l ALL_REG, (sp)
+000006EA                           717  
+Line 718 ERROR: Undefined symbol
+000006EA  49F9 004DBD16            718      lea     BackgroundImage, a4
+Line 719 ERROR: Undefined symbol
+000006F0  9FFC 004DBD16            719      sub.l   #SEVEN_ARGS_FUNC, sp
+000006F6                           720      
+Line 721 ERROR: Undefined symbol
+000006F6  2F4C 55B8                721      move.l  a4, BMP_ADDR(sp)
+000006FA                           722      
+Line 723 ERROR: Undefined symbol
+000006FA  2F41 55B8                723      move.l  d1, X_SCREEN(sp)        
+Line 724 ERROR: Undefined symbol
+000006FE  2F41 55C8                724      move.l  d1, X_BMP(sp)               ; X_BMP = X_SCREEN
+00000702                           725          
+Line 726 ERROR: Undefined symbol
+00000702  2F42 55B8                726      move.l  d2, Y_SCREEN(sp)
+Line 727 ERROR: Comma expected
+00000706                           727      sub.l   #WINDOW_HEIGHT-BACKGROUND_HEIGHT-1, d2
+Line 728 ERROR: Undefined symbol
+00000706  2F42 55D0                728      move.l  d2, Y_BMP(sp)               ; Y_BMP = Y_SCREEN - (ScreenHeight - BackgroundHeight -1)
+0000070A                           729      
+Line 730 ERROR: Invalid syntax
+0000070A                           730      move.l  #ENEMY_PROJECTILE_SIZE+ENEMY_PROJECTILE_OUTER_SIZE, WIDTH_TO_DISPLAY(sp)
+Line 731 ERROR: Invalid syntax
+0000070A                           731      move.l  #ENEMY_PROJECTILE_SIZE+ENEMY_PROJECTILE_OUTER_SIZE, HEIGHT_TO_DISPLAY(sp)
+0000070A                           732      
+Line 733 ERROR: Undefined symbol
+0000070A  4EB9 004DBD16            733      jsr     displayBitmapChunk
+00000710                           734      
+Line 735 ERROR: Undefined symbol
+00000710  DFFC 004DBD16            735      add.l   #SEVEN_ARGS_FUNC, sp    ; Fix stack
+00000716                           736  
+Line 737 ERROR: Undefined symbol
+00000716                           737      movem.l (sp), ALL_REG
+Line 738 ERROR: Invalid syntax
+00000716                           738      add.l   #LONG_OFFSET*15, sp
+00000716                           739      
+00000716                           740  ***** End draw bitmap chunk context *****
+Line 741 ERROR: Symbol value differs between first and second pass
+00000716                           741  loopBackBGEnemyProjectile:
+00000716  6008                     742      bra     checkBGEnemyProjectileLoop
+00000718                           743      
+Line 744 ERROR: Symbol value differs between first and second pass
+00000718                           744  skipBGEnemyProjectileDrawing:
+00000718  4E75                     745      rts
+0000071A                           746  
+Line 747 ERROR: Symbol value differs between first and second pass
+0000071A                           747  drawStars:
+0000071A                           748  * Loop through the IsStarActive array, if it is active, then draw the star. Loop through the limit.
+0000071A                           749  * Registers used: D0-D6, A1, A2
+0000071A                           750      
+Line 751 ERROR: Comma expected
+0000071A                           751      move.l  #STAR_LIMIT-1, d6
+Line 752 ERROR: Undefined symbol
+0000071A  43F9 004DBD16            752      lea     IsStarActive, a1
+00000720                           753      
+Line 754 ERROR: Symbol value differs between first and second pass
+00000720                           754  drawStarsLoop:
+Line 755 ERROR: Undefined symbol
+00000720  0C19 0016                755      cmp.b   #STAR_STATUS_ACTIVE, (a1)+
+00000724  6700 00B2                756      beq     drawStar
+00000728                           757      
+Line 758 ERROR: Symbol value differs between first and second pass
+00000728                           758  continueDrawStarLoop:
+00000728  51CE 00A0                759      dbra    d6, drawStarsLoop    
+0000072C                           760      
+0000072C                           761  * Finished looping array here, return
+0000072C  4E75                     762      rts
+0000072E                           763  
+0000072E                           764  
+0000072E                           765      
+Line 766 ERROR: Symbol value differs between first and second pass
+0000072E                           766  drawStar:
+0000072E                           767  * Found an active star, draw it here
+0000072E  2A06                     768      move.l  d6, d5
+Line 769 ERROR: Comma expected
+00000730                           769      sub.l   #STAR_LIMIT-1, d5
+00000730  4485                     770      neg.l   d5
+00000732  E58D                     771      lsl.l   #2, d5                      ; D5 contains long-offset index
+00000734                           772      
+00000734                           773  * Set pen width
+Line 774 ERROR: Undefined symbol
+00000734  203C 004DBD16            774      move.l  #TASK_SET_PEN_WIDTH, d0
+Line 775 ERROR: Undefined symbol
+0000073A  223C 004DBD16            775      move.l  #DEFAULT_PEN_WIDTH, d1
+00000740  4E4F                     776      trap    #15
+00000742                           777      
+00000742                           778  * Set the star color
+Line 779 ERROR: Undefined symbol
+00000742  45F9 004DBD16            779      lea     StarColors, a2
+00000748  2232 5000                780      move.l  (a2, d5), d1                ; D1 contains star's color
+Line 781 ERROR: Undefined symbol
+0000074C  203C 004DBD16            781      move.l  #TASK_SET_PEN_COLOR, d0
+00000752  4E4F                     782      trap    #15
+Line 783 ERROR: Undefined symbol
+00000754  203C 004DBD16            783      move.l  #TASK_SET_FILL_COLOR, d0
+0000075A  4E4F                     784      trap    #15
+0000075C                           785  
+0000075C                           786  * Set the star position
+Line 787 ERROR: Undefined symbol
+0000075C  45F9 004DBD16            787      lea     FStarPosX, a2
+00000762  2E32 5000                788      move.l  (a2, d5), d7                ; D7 = Fixed point StarX
+Line 789 ERROR: Undefined symbol
+00000766  EC8F                     789      lsr.l   #FRACTIONAL_BITS, d7        ; To integer
+00000768  2207                     790      move.l  d7, d1                      ; RightX
+0000076A                           791      
+Line 792 ERROR: Undefined symbol
+0000076A  45F9 004DBD16            792      lea     FStarPosY, a2
+00000770  2E32 5000                793      move.l  (a2, d5), d7                ; D7 = Fixed point StarY
+Line 794 ERROR: Undefined symbol
+00000774  EC8F                     794      lsr.l   #FRACTIONAL_BITS, d7        ; To integer
+00000776  2407                     795      move.l  d7, d2                      ; UpperY
+00000778                           796      
+Line 797 ERROR: Undefined symbol
+00000778  45F9 004DBD16            797      lea     StarSizes, a2
+0000077E  2632 5000                798      move.l  (a2, d5), d3
+00000782  2803                     799      move.l  d3, d4                      ; Set LeftX and LowerY to StarSize
+00000784  D681                     800      add.l   d1, d3                      ; LeftX = RightX + StarSize
+00000786  D882                     801      add.l   d2, d4                      ; LowerY = UpperY + StarSize
+00000788                           802  
+00000788                           803  * Draw it
+Line 804 ERROR: Undefined symbol
+00000788  203C 004DBD16            804      move.l  #TASK_DRAW_FILLED_ELLIPSE, d0
+0000078E  4E4F                     805      trap    #15
+00000790                           806  
+00000790  6040                     807      bra     continueDrawStarLoop
+00000792                           808  
+Line 809 ERROR: Symbol value differs between first and second pass
+00000792                           809  drawPowerups:
+00000792                           810  * Loop through the IsPowerUpActive array and draw them accordingly
+00000792                           811  * Registers used: D0-D7, A1-A2
+00000792                           812  
+Line 813 ERROR: Undefined symbol
+00000792  43F9 004DBD16            813      lea     IsPowerUpActive, a1
+Line 814 ERROR: Comma expected
+00000798                           814      move.l  #MAX_POWERUPS_ON_SCREEN-1, d6
+00000798                           815      
+Line 816 ERROR: Symbol value differs between first and second pass
+00000798                           816  drawPowerUpsLoop:
+Line 817 ERROR: Undefined symbol
+00000798  0C19 0016                817      cmp.b   #POWERUP_STATUS_ACTIVE, (a1)+
+0000079C  6700 00BE                818      beq     drawPowerUp
+000007A0                           819      
+Line 820 ERROR: Symbol value differs between first and second pass
+000007A0                           820  continueDrawPowerUpsLoop:
+000007A0  51CE 00AC                821      dbra    d6, drawPowerUpsLoop
+000007A4                           822      
+000007A4                           823  * Finished drawing everything, return
+000007A4  4E75                     824      rts
+000007A6                           825      
+Line 826 ERROR: Symbol value differs between first and second pass
+000007A6                           826  drawPowerUp:
+000007A6                           827  * Found an active power-up, so draw it here
+000007A6  2A06                     828      move.l  d6, d5
+Line 829 ERROR: Comma expected
+000007A8                           829      sub.l   #MAX_POWERUPS_ON_SCREEN-1, d5
+000007A8  4485                     830      neg.l   d5                                  ; D5 contains true index
+000007AA                           831      
+000007AA                           832  * Get the power-up color by its type
+Line 833 ERROR: Undefined symbol
+000007AA  45F9 004DBD16            833      lea     PowerUpType, a2
+000007B0  4281                     834      clr.l   d1
+000007B2  1232 5000                835      move.b  (a2, d5), d1                        
+000007B6  E58F                     836      lsl.l   #2, d7                              ; D7 contains power-up enum long offset
+000007B8                           837      
+000007B8                           838  * Set the color
+Line 839 ERROR: Undefined symbol
+000007B8  45F9 004DBD16            839      lea     PowerUpColors, a2
+000007BE  2232 7000                840      move.l  (a2, d7), d1                        ; D1 contains color
+000007C2                           841      
+Line 842 ERROR: Undefined symbol
+000007C2  203C 004DBD16            842      move.l  #TASK_SET_FILL_COLOR, d0
+000007C8  4E4F                     843      trap    #15
+000007CA                           844      
+000007CA                           845  * Outline with darker color
+000007CA  E209                     846      lsr.b   #1, d1                              ; Halve the B
+000007CC  E099                     847      ror.l   #8, d1
+000007CE  E209                     848      lsr.b   #1, d1                              ; G
+000007D0  E099                     849      ror.l   #8, d1
+000007D2  E209                     850      lsr.b   #1, d1                              ; R
+000007D4                           851      
+000007D4  E099                     852      ror.l   #8, d1
+000007D6  E099                     853      ror.l   #8, d1                              ; Rotate full long-length
+000007D8                           854      
+Line 855 ERROR: Undefined symbol
+000007D8  203C 004DBD16            855      move.l  #TASK_SET_PEN_COLOR, d0
+000007DE  4E4F                     856      trap    #15
+000007E0                           857      
+000007E0                           858  * Set pen size
+Line 859 ERROR: Undefined symbol
+000007E0  223C 004DBD16            859      move.l  #POWERUP_PEN_SIZE, d1
+Line 860 ERROR: Undefined symbol
+000007E6  203C 004DBD16            860      move.l  #TASK_SET_PEN_WIDTH, d0
+000007EC  4E4F                     861      trap    #15
+000007EE                           862      
+000007EE                           863  * Draw the shape (circle)
+000007EE  E58D                     864      lsl.l   #2, d5                              ; D5 contains long-offset power-up index
+000007F0                           865      
+000007F0                           866  * LeftX
+Line 867 ERROR: Undefined symbol
+000007F0  45F9 004DBD16            867      lea     FPowerUpPosX, a2
+000007F6  2232 5000                868      move.l  (a2, d5), d1
+Line 869 ERROR: Undefined symbol
+000007FA  EC89                     869      lsr.l   #FRACTIONAL_BITS, d1                ; To integer
+000007FC                           870      
+000007FC                           871  * RightX
+000007FC  2601                     872      move.l  d1, d3
+Line 873 ERROR: Undefined symbol
+000007FE  0683 004DBD16            873      add.l   #POWERUP_SIZE, d3
+00000804                           874  
+00000804                           875  * UpperY
+Line 876 ERROR: Undefined symbol
+00000804  45F9 004DBD16            876      lea     FPowerUpPosY, a2
+0000080A  2432 5000                877      move.l  (a2, d5), d2
+Line 878 ERROR: Undefined symbol
+0000080E  EC8A                     878      lsr.l   #FRACTIONAL_BITS, d2                ; To integer
+00000810                           879  
+00000810                           880  * LowerY
+00000810  2802                     881      move.l  d2, d4
+Line 882 ERROR: Undefined symbol
+00000812  0684 004DBD16            882      add.l   #POWERUP_SIZE, d4
+00000818                           883  
+00000818                           884  * Draw
+Line 885 ERROR: Undefined symbol
+00000818  203C 004DBD16            885      move.l  #TASK_DRAW_FILLED_ELLIPSE, d0
+0000081E  4E4F                     886      trap    #15
+00000820                           887  
+00000820                           888  * Draw icon
+Line 889 ERROR: Invalid syntax
+00000820                           889      sub.l   #LONG_OFFSET*15, sp
+Line 890 ERROR: Undefined symbol
+00000820                           890      movem.l ALL_REG, (sp)
+00000820                           891      
+Line 892 ERROR: Undefined symbol
+00000820  45F9 004DBD16            892      lea     PowerUpIconFunc, a2
+00000826  2472 7000                893      move.l  (a2, d7), a2                        ; D7 contains long-offset power-up enum
+0000082A  4E92                     894      jsr     (a2)
+0000082C                           895      
+Line 896 ERROR: Undefined symbol
+0000082C                           896      movem.l (sp), ALL_REG
+Line 897 ERROR: Invalid syntax
+0000082C                           897      add.l   #LONG_OFFSET*15, sp
+0000082C                           898  
+0000082C  6028                     899      bra     continueDrawPowerUpsLoop
+0000082E                           900  
+Line 901 ERROR: Symbol value differs between first and second pass
+0000082E                           901  drawMoveSpeedIcon:
+0000082E                           902  * Draw the movement speed icon
+0000082E                           903      
+0000082E  4E75                     904      rts
+00000830                           905      
+Line 906 ERROR: Symbol value differs between first and second pass
+00000830                           906  drawAtkSpeedIcon:
+00000830  4E75                     907      rts
+00000832                           908      
+Line 909 ERROR: Symbol value differs between first and second pass
+00000832                           909  drawFuelIcon:
+00000832  4E75                     910      rts
+00000834                           911      
+Line 912 ERROR: Symbol value differs between first and second pass
+00000834                           912  drawSpreadIcon:
+00000834  4E75                     913      rts
+00000836                           914  
+Line 915 ERROR: Symbol value differs between first and second pass
+00000836                           915  drawBackgroundImage:
+00000836                           916  * Registers used: A1
+Line 917 ERROR: Undefined symbol
+00000836  43F9 004DBD16            917      lea     BackgroundImage, a1
+0000083C                           918  
+Line 919 ERROR: Undefined symbol
+0000083C  9FFC 004DBD16            919      sub.l   #THREE_ARGS_FUNC, sp
+00000842                           920      
+Line 921 ERROR: Undefined symbol
+00000842  2F49 55B8                921      move.l  a1, BMP_ADDR(sp)
+Line 922 ERROR: Undefined symbol
+00000846  2F7C 00000000 55B8       922      move.l  #0, X_SCREEN(sp)
+Line 923 ERROR: Comma expected
+0000084E                           923      move.l  #WINDOW_HEIGHT-BACKGROUND_HEIGHT-1, Y_SCREEN(sp)
+0000084E                           924      
+Line 925 ERROR: Undefined symbol
+0000084E  4EB9 004DBD16            925      jsr     displayBitmap
+Line 926 ERROR: Undefined symbol
+00000854  DFFC 004DBD16            926      add.l   #THREE_ARGS_FUNC, sp
+0000085A  4E75                     927      rts
+0000085C                           928      
+Line 929 ERROR: Symbol value differs between first and second pass
+0000085C                           929  clearScreen:
+0000085C                           930  * Registers used: D0, D1
+0000085C                           931  
+Line 932 ERROR: Undefined symbol
+0000085C  323C BD16                932      move.w  #CLEAR_SCREEN, d1
+Line 933 ERROR: Undefined symbol
+00000860  203C 004DBD16            933      move.l  #TASK_SCREEN, d0
+00000866  4E4F                     934      trap    #15
+00000868  4E75                     935      rts
+0000086A                           936      
+Line 937 ERROR: Symbol value differs between first and second pass
+0000086A                           937  clearPlayableScreen:
+0000086A                           938  * Draw a huge rectangle over the playable area without affecting the background
+0000086A                           939  * Registers used: D0-D1
+0000086A                           940      
+Line 941 ERROR: Undefined symbol
+0000086A  203C 004DBD16            941      move.l  #TASK_SET_PEN_COLOR, d0
+Line 942 ERROR: Undefined symbol
+00000870  223C 004DBD16            942      move.l  #BACKGROUND_COLOR, d1
+00000876  4E4F                     943      trap    #15
+00000878                           944      
+Line 945 ERROR: Undefined symbol
+00000878  203C 004DBD16            945      move.l  #TASK_SET_FILL_COLOR, d0
+0000087E  4E4F                     946      trap    #15                         ; Use background color in D1 earlier
+00000880                           947      
+00000880                           948  * Draw rectangle with following params:
+00000880                           949  * LeftX: 0, UpperY: 0, RightX: WINDOW_WIDTH-1, LowerY: WINDOW_HEIGHT-BACKGROUND_HEIGHT-1
+00000880  7200                     950      move.l  #0, d1
+00000882  7400                     951      move.l  #0, d2
+Line 952 ERROR: Comma expected
+00000884                           952      move.l  #WINDOW_WIDTH-1, d3
+Line 953 ERROR: Comma expected
+00000884                           953      move.l  #WINDOW_HEIGHT-BACKGROUND_HEIGHT-1, d4
+00000884                           954      
+Line 955 ERROR: Undefined symbol
+00000884  203C 004DBD16            955      move.l  #TASK_DRAW_FILLED_RECTANGLE, d0
+0000088A  4E4F                     956      trap    #15
+0000088C  4E75                     957      rts
+0000088E                           958      
+Line 959 ERROR: Symbol value differs between first and second pass
+0000088E                           959  drawPlayerLivesCount:
+0000088E                           960  * Should only call this when we need the UI to update
+0000088E                           961  * Like when the player took damage
+0000088E                           962  * Registers used: D0-D7
+Line 963 ERROR: Undefined symbol
+0000088E  2039 004DBD16            963      move.l  PlayerLives, d0
+Line 964 ERROR: Undefined symbol
+00000894  4EB9 004DBD16            964      jsr     hexToDecimal                ; D7 contains decimal number of lives
+0000089A                           965      
+0000089A  2207                     966      move.l  d7, d1
+Line 967 ERROR: Undefined symbol
+0000089C  243C 004DBD16            967      move.l  #PLAYER_LIVES_X, d2
+Line 968 ERROR: Undefined symbol
+000008A2  263C 004DBD16            968      move.l  #PLAYER_LIVES_Y, d3
+Line 969 ERROR: Undefined symbol
+000008A8  4EB9 004DBD16            969      jsr     drawSevenSegment
+000008AE                           970      
+000008AE  4E75                     971      rts
+000008B0                           972      
+Line 973 ERROR: Symbol value differs between first and second pass
+000008B0                           973  swapBuffers:
+000008B0                           974  * Registers used: D0
+000008B0                           975  
+Line 976 ERROR: Undefined symbol
+000008B0  203C 004DBD16            976      move.l  #TASK_REPAINT_SCREEN, d0
+000008B6  4E4F                     977      trap    #15
+000008B8  4E75                     978      rts
+000008BA                           979  
+000008BA                           980  
+000008BA                           981  
+000008BA                           982  
+000008BA                           983  
+000008BA                           984  
+000008BA                           985  
+000008BA                           986  
+Line 987 WARNING: END directive missing, starting address not set
+
+358 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CHECKACTIVEDRAWPROJECTILELOOP  622
+CHECKALIVEENEMYDRAWENEMIESLOOP  40E
+CHECKBGENEMYPROJECTILELOOP  720
+CHECKENEMYDRAWPROJECTILELOOP  69E
+CHECKPLAYERSPRITEVISIBILITY  38C
+CLEARPLAYABLESCREEN  93C
+CLEARSCREEN         92E
+CONTINUEDRAWFLOATINGTEXTLOOP  144
+CONTINUEDRAWPOWERUPSLOOP  856
+CONTINUEDRAWSTARLOOP  7D2
+DRAWATKSPEEDICON    8FA
+DRAWBACKGROUNDASYNC  B6
+DRAWBACKGROUNDIMAGE  900
+DRAWBGENEMYPROJECTILE  738
+DRAWDEPLETEDFUELGAUGE  1FC
+DRAWENEMIES         406
+DRAWENEMY           426
+DRAWENEMYPROJECTILE  6B6
+DRAWENEMYPROJECTILES  696
+DRAWENEMYPROJECTILESBGTRAIL  718
+DRAWFLOATINGTEXT    D0
+DRAWFLOATINGTEXTLOOP  DC
+DRAWFUELGAUGE       248
+DRAWFUELGAUGERECTANGLE  1B8
+DRAWFUELICON        8FC
+DRAWFUELTEXT        194
+DRAWGAMEOVERIMAGE   312
+DRAWHOMESCREENIMAGE  2AA
+DRAWLIVESTEXT       170
+DRAWLOADINGIMAGE    2DE
+DRAWMOVESPEEDICON   8F8
+DRAWPLAYER          346
+DRAWPLAYERLIVESCOUNT  96C
+DRAWPLAYERPROJECTILE  63A
+DRAWPLAYERPROJECTILES  61A
+DRAWPLAYERSPRITEACTIVE  398
+DRAWPOWERUP         85C
+DRAWPOWERUPS        842
+DRAWPOWERUPSLOOP    84E
+DRAWSPREADICON      8FE
+DRAWSTAR            7D8
+DRAWSTARS           7BE
+DRAWSTARSLOOP       7CA
+GETFUELGAUGEWIDTH   268
+INITIALIZEFUELGAUGE  92
+INITIALIZEPLAYERANIM  7C
+INITIALIZERENDERER  0
+LOOPBACKBGENEMYPROJECTILE  7B8
+RENDERCYCLE         26
+RENDERENEMY         482
+RENDERENEMYTENTACLE  52C
+SETBACKGROUNDCOLORASFILL  160
+SETDEFAULTFONT      14A
+SETDOUBLEBUFFERING  284
+SETSCREENRESOLUTION  294
+SKIPBGENEMYPROJECTILEDRAWING  7BC
+SKIPDRAWINGDEPLETED  246
+SKIPDRAWINGPLAYER   404
+SKIPENEMYDRAWING    480
+SKIPENEMYPROJECTILEDRAWING  716
+SKIPPLAYERFRAME     3D4
+SKIPPLAYERPROJECTILEDRAWING  694
+SWAPBUFFERS         98E
+SWITCHPLAYERSPRITEVISIBILITY  372

@@ -1,0 +1,152 @@
+00001060 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/10/2024 12:14:40 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Sin Table
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/10/2024
+00000000                             5  * Description: Sin table to calculate enemy's positions in sin wave pattern
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8      
+00001000  =00000008                  9  FRACTIONAL_BITS         equ 8
+00001000                            10  
+00001000  =0000000A                 11  SIN_ANGLE_INTERVAL      equ 10
+00001000  =00000168                 12  FULL_CIRCLE_ANGLE       equ 360
+00001000  =00000324                 13  FPI                     equ $324
+00001000                            14  
+00001000                            15  SinRadian:
+00001000                            16  * Sin function but in radian
+00001000                            17  * Parameters: Angle in radian (Passes through heap)
+00001000                            18  * Returns: Sin value (D6)
+00001000                            19      
+00001000                            20  * Convert radian to degree by multiplying by 180 and dividing by pi
+00001000                            21  * Multiply
+00001000  2E39 00001076             22      move.l  FSinRadianParam, d7
+00001006  CFFC 00B4                 23      muls    #FULL_CIRCLE_ANGLE>>1, d7
+0000100A                            24  
+0000100A                            25  * Divide
+0000100A  8FFC 0324                 26      divs    #FPI, d7
+0000100E  4847                      27      swap    d7
+00001010  3E3C 0000                 28      move.w  #0, d7
+00001014  4847                      29      swap    d7                          ; Get the quotient only
+00001016                            30      
+00001016  23C7 00001072             31      move.l  d7, SinDegreeParam
+0000101C  4EB9 00001024             32      jsr     SinDegree
+00001022  4E75                      33      rts
+00001024                            34  
+00001024                            35  SinDegree:
+00001024                            36  * Parameters: Angle in degree (Passes through heap)
+00001024                            37  * Returns: Sin value (D6)
+00001024                            38  
+00001024                            39  * Registers used: D7, A1
+00001024                            40  
+00001024                            41  *** NOTE: ***
+00001024                            42  * Right now, simply round down and return the lower sin value
+00001024                            43  
+00001024                            44  * More precise implementation idea if there's time:
+00001024                            45  
+00001024                            46  * We divide the angle with the interval to get two things
+00001024                            47  * Index to look up in the table     : Quotient
+00001024                            48  * Linear proportion to step         : Remainder
+00001024                            49  
+00001024                            50  
+00001024                            51  * Get the modded value
+00001024  2E39 00001072             52      move.l  SinDegreeParam, d7
+0000102A  8FFC 0168                 53      divs    #FULL_CIRCLE_ANGLE, d7
+0000102E  3E3C 0000                 54      move.w  #0, d7
+00001032  4847                      55      swap    d7
+00001034  48C7                      56      ext.l   d7
+00001036                            57      
+00001036                            58  * Add and remod the full circle degree to handle negative angle values
+00001036  0687 00000168             59      add.l   #FULL_CIRCLE_ANGLE, d7
+0000103C  8FFC 0168                 60      divs    #FULL_CIRCLE_ANGLE, d7
+00001040  3E3C 0000                 61      move.w  #0, d7
+00001044  4847                      62      swap    d7
+00001046                            63      
+00001046                            64  * Get the index of the lookup table
+00001046  8FFC 000A                 65      divs    #SIN_ANGLE_INTERVAL, d7
+0000104A                            66      
+0000104A                            67  * Clear the remainder
+0000104A  4847                      68      swap    d7
+0000104C  3E3C 0000                 69      move.w  #0, d7
+00001050  4847                      70      swap    d7
+00001052                            71      
+00001052                            72  * Look up the sin value
+00001052  E58F                      73      lsl.l   #2, d7          ; Long offset
+00001054  43F9 0000107A             74      lea     SinTable, a1
+0000105A  2C31 7000                 75      move.l  (a1, d7), d6
+0000105E                            76      
+0000105E  4E75                      77      rts
+00001060                            78      
+00001060                            79  START:                  ; first instruction of program
+00001060                            80  
+00001060                            81  * Put program code here
+00001060  23FC 00000100 00001076    82      move.l  #1<<FRACTIONAL_BITS, FSinRadianParam
+0000106A  4EB8 1000                 83      jsr     SinRadian
+0000106E  FFFF FFFF                 84      SIMHALT             ; halt simulator
+00001072                            85  
+00001072                            86  * Put variables and constants here
+00001072                            87  SinDegreeParam          ds.l    1
+00001076                            88  FSinRadianParam         ds.l    1
+0000107A                            89  SinTable        
+0000107A                            90  *           Value   Angle
+0000107A= 00000000                  91      dc.l    $0      * 0
+0000107E= 0000002C                  92      dc.l    $2C     * 10
+00001082= 00000058                  93      dc.l    $58     * 20
+00001086= 00000080                  94      dc.l    $80     * 30
+0000108A= 000000A5                  95      dc.l    $A5     * 40
+0000108E= 000000C4                  96      dc.l    $C4     * 50
+00001092= 000000DE                  97      dc.l    $DE     * 60
+00001096= 000000F1                  98      dc.l    $F1     * 70
+0000109A= 000000FC                  99      dc.l    $FC     * 80
+0000109E= 00000100                 100      dc.l    $100    * 90
+000010A2= 000000FC                 101      dc.l    $FC     * 100
+000010A6= 000000F1                 102      dc.l    $F1     * 110
+000010AA= 000000DE                 103      dc.l    $DE     * 120
+000010AE= 000000C4                 104      dc.l    $C4     * 130
+000010B2= 000000A5                 105      dc.l    $A5     * 140
+000010B6= 00000080                 106      dc.l    $80     * 150
+000010BA= 00000058                 107      dc.l    $58     * 160
+000010BE= 0000002C                 108      dc.l    $2C     * 170
+000010C2= 00000000                 109      dc.l    $0      * 180
+000010C6= FFFFFFD4                 110      dc.l    -$2C    * 100
+000010CA= FFFFFFA8                 111      dc.l    -$58    * 200
+000010CE= FFFFFF80                 112      dc.l    -$80    * 210
+000010D2= FFFFFF5B                 113      dc.l    -$A5    * 220
+000010D6= FFFFFF3C                 114      dc.l    -$C4    * 230
+000010DA= FFFFFF22                 115      dc.l    -$DE    * 240
+000010DE= FFFFFF0F                 116      dc.l    -$F1    * 250
+000010E2= FFFFFF04                 117      dc.l    -$FC    * 260
+000010E6= FFFFFF00                 118      dc.l    -$100   * 270
+000010EA= FFFFFF04                 119      dc.l    -$FC    * 280
+000010EE= FFFFFF0F                 120      dc.l    -$F1    * 290
+000010F2= FFFFFF22                 121      dc.l    -$DE    * 300
+000010F6= FFFFFF3C                 122      dc.l    -$C4    * 310
+000010FA= FFFFFF5B                 123      dc.l    -$A5    * 320
+000010FE= FFFFFF80                 124      dc.l    -$80    * 330
+00001102= FFFFFFA8                 125      dc.l    -$58    * 340
+00001106= FFFFFFD4                 126      dc.l    -$2C    * 350
+0000110A= 00000000                 127      dc.l    $0      * 360
+0000110E                           128  
+0000110E                           129  
+0000110E                           130      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+FPI                 324
+FRACTIONAL_BITS     8
+FSINRADIANPARAM     1076
+FULL_CIRCLE_ANGLE   168
+SINDEGREE           1024
+SINDEGREEPARAM      1072
+SINRADIAN           1000
+SINTABLE            107A
+SIN_ANGLE_INTERVAL  A
+START               1060

@@ -1,0 +1,598 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/14/2024 1:41:38 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Variables
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/6/2024
+00000000                             5  * Description: Heap variables
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  HomeScreenImage     INCBIN  "title_screen.bmp"
+0002AD32                             9  TutorialScreenImage INCBIN  "tutorial_screen.bmp"
+00055A64                            10  BackgroundImage     INCBIN  "space.bmp"
+000802EE                            11  LoadingImage        INCBIN  "loading.bmp"
+0008F424                            12  GameOverImage       INCBIN  "gameover.bmp"
+000AE8AE                            13  EnemyImage          INCBIN  "enemy.bmp"
+000AF938                            14  
+000AF938                            15  PlayerFrame_1               INCBIN  "player_1.bmp"
+000B0642                            16  PlayerFrame_2               INCBIN  "player_2.bmp"
+000B134C                            17  PlayerFrame_3               INCBIN  "player_3.bmp"
+000B2056= 000AF938 000B0642 ...     18  PlayerSprites               dc.l    PlayerFrame_1, PlayerFrame_2, PlayerFrame_3
+000B2062= 00                        19  CurrentPlayerFrame          dc.b    0
+000B2064= 00000000                  20  TimeSinceLastPlayerFrame    dc.l    0
+000B2068                            21  
+000B2068= 00000000                  22  LastUpdateTime      dc.l    0
+000B206C= 00000001                  23  DeltaTime           dc.l    1
+000B2070                            24  
+000B2070                            25  IsPlayerAttacking   ds.b    1
+000B2071                            26  
+000B2072                            27  PlayerScore             ds.l    1
+000B2076                            28  FPlayerX                ds.l    1
+000B207A                            29  FPlayerY                ds.l    1
+000B207E                            30  FPlayerSpeed            ds.l    1
+000B2082                            31  PlayerAttackCooldown    ds.l    1
+000B2086                            32  
+000B2086= 00000000                  33  PlayerLives             dc.l    0
+000B208A= 00000000                  34  PlayerInvulTime         dc.l    0
+Line 35 ERROR: Undefined symbol
+000B208E= F8                        35  PlayerSpriteActive      dc.b    TRUE
+000B2090= 00000000                  36  PlayerBlinkTime         dc.l    0
+000B2094                            37  
+000B2094                            38  CurrentFuel             ds.l    1
+000B2098                            39  LastFuelGaugeWidth      ds.l    1
+000B209C                            40  CurrentFuelGaugeWidth   ds.l    1
+000B20A0                            41  
+000B20A0= 00000000                  42  TimeSinceLastEnemySpawned   dc.l    0
+Line 43 ERROR: Undefined symbol
+000B20A4                            43  IsEnemyAlive                ds.b    MAX_ENEMY_ALLOWED
+Line 44 ERROR: Undefined symbol
+000B20A4                            44  EnemyTypes                  ds.b    MAX_ENEMY_ALLOWED
+Line 45 ERROR: Undefined symbol
+000B20A4                            45  FEnemyPosX                  ds.l    MAX_ENEMY_ALLOWED
+Line 46 ERROR: Undefined symbol
+000B20A4                            46  FEnemyPosY                  ds.l    MAX_ENEMY_ALLOWED
+Line 47 ERROR: Undefined symbol
+000B20A4                            47  FEnemyStartPosY             ds.l    MAX_ENEMY_ALLOWED
+000B20A4                            48  
+Line 49 ERROR: Undefined symbol
+000B20A4                            49  LastEnemyShootingTime       ds.l    MAX_ENEMY_ALLOWED
+000B20A4                            50  
+Line 51 ERROR: Undefined symbol
+000B20A4                            51  IsEnemyProjectileActive     ds.b    MAX_ENEMY_PROJECTILE
+Line 52 ERROR: Undefined symbol
+000B20A4                            52  FEnemyProjectileX           ds.l    MAX_ENEMY_PROJECTILE
+Line 53 ERROR: Undefined symbol
+000B20A4                            53  FEnemyProjectileY           ds.l    MAX_ENEMY_PROJECTILE
+Line 54 ERROR: Undefined symbol
+000B20A4                            54  FEnemyProjectileVY          ds.l    MAX_ENEMY_PROJECTILE
+000B20A4                            55  
+Line 56 ERROR: Undefined symbol
+000B20A4= 0019F7F8                  56  EnemyColors                 dc.l    COLOR_ENEMY_NORMAL
+Line 57 ERROR: Undefined symbol
+000B20A8= 0019F7F8                  57                              dc.l    COLOR_ENEMY_NIMBLE
+Line 58 ERROR: Undefined symbol
+000B20AC= 0019F7F8                  58                              dc.l    COLOR_ENEMY_FIERCE
+Line 59 ERROR: Undefined symbol
+000B20B0= 0019F7F8                  59                              dc.l    COLOR_ENEMY_SPECIAL
+000B20B4                            60                              
+000B20B4= 00000032                  61  EnemyScoreBounty            dc.l    50  ; Normal
+000B20B8= 00000064                  62                              dc.l    100 ; Nimble
+000B20BC= 00000064                  63                              dc.l    100 ; Fierce
+000B20C0= 00000096                  64                              dc.l    150 ; Special
+000B20C4                            65                              
+000B20C4                            66  * If enough time, should create a regToString function instead of hardcopy like this
+000B20C4= 000B20D4 000B20D7 ...     67  StrEnemyScoreBountyArr      dc.l    StrEnemyScoreBounty_1, StrEnemyScoreBounty_2, StrEnemyScoreBounty_3, StrEnemyScoreBounty_4
+000B20D4= 35 30 00                  68  StrEnemyScoreBounty_1       dc.b    '50', 0
+000B20D7= 31 30 30 00               69  StrEnemyScoreBounty_2       dc.b    '100', 0
+000B20DB= 31 30 30 00               70  StrEnemyScoreBounty_3       dc.b    '100', 0
+000B20DF= 31 35 30 00               71  StrEnemyScoreBounty_4       dc.b    '150', 0
+000B20E3                            72                              
+000B20E4                            73  EnemyColorArg               ds.l    1
+000B20E8                            74  EnemyLeftXArg               ds.l    1
+000B20EC                            75  EnemyUpperYArg              ds.l    1
+000B20F0                            76  
+000B20F0                            77  EnemySpawnedThisGroup       ds.l    1
+000B20F4                            78  EnemyMaxThisGroup           ds.l    1
+000B20F8                            79  FEnemyGroupRandomY          ds.l    1
+000B20FC                            80  
+Line 81 ERROR: Undefined symbol
+000B20FC= 0019F7F8 0019F7F8 ...     81  EnemySpawnRateArray         dc.l    ENEMY_SPAWNRATE_NIMBLE, ENEMY_SPAWNRATE_FIERCE, ENEMY_SPAWNRATE_SPECIAL
+000B2108                            82  
+000B2108                            83  LastPlayerShootingTime  ds.l    1
+Line 84 ERROR: Undefined symbol
+000B210C                            84  IsProjectileActive      ds.b    MAX_PLAYER_PROJECTILE
+Line 85 ERROR: Undefined symbol
+000B210C                            85  FProjectilePosX         ds.l    MAX_PLAYER_PROJECTILE
+Line 86 ERROR: Undefined symbol
+000B210C                            86  FProjectilePosY         ds.l    MAX_PLAYER_PROJECTILE
+000B210C= 00000000                  87  PlayerProjToSpawn       dc.l    0                           ; For spread power-up
+000B2110                            88  
+000B2110                            89  * Difficulty
+000B2110= 00000000                  90  MaxEnemy                    dc.l    0
+000B2114= 00000000                  91  TimeToSpawnEnemy            dc.l    0
+000B2118= 00000000                  92  EnemyShootingTime           dc.l    0
+000B211C= 00000000                  93  FuelDepletionRate           dc.l    0
+000B2120= 00000000                  94  DifficultyLevel             dc.l    0
+000B2124= 00000000                  95  TimeSinceStartGame          dc.l    0
+000B2128                            96  
+000B2128= 000001F4                  97  TimeToChangeDifficulty      dc.l    500
+000B212C= 000003E8                  98                              dc.l    1000
+000B2130= 000005DC                  99                              dc.l    1500
+000B2134= 000007D0                 100                              dc.l    2000
+000B2138= 000009C4                 101                              dc.l    2500
+000B213C= 00000BB8                 102                              dc.l    3000
+000B2140= 00000DAC                 103                              dc.l    3500
+000B2144= 00000FA0                 104                              dc.l    4000
+000B2148                           105  
+000B2148= 0000000A                 106  MaxEnemyByLevel             dc.l    10
+000B214C= 0000000A                 107                              dc.l    10
+000B2150= 0000000C                 108                              dc.l    12
+000B2154= 0000000E                 109                              dc.l    14
+000B2158= 00000010                 110                              dc.l    16
+000B215C= 00000012                 111                              dc.l    18
+000B2160= 00000014                 112                              dc.l    20
+000B2164= 00000016                 113                              dc.l    22
+000B2168= 00000018                 114                              dc.l    24
+000B216C                           115  
+000B216C= 00000032                 116  TimeToSpawnEnemyByLevel     dc.l    50
+000B2170= 0000002D                 117                              dc.l    45
+000B2174= 00000029                 118                              dc.l    41
+000B2178= 00000026                 119                              dc.l    38
+000B217C= 00000024                 120                              dc.l    36
+000B2180= 00000021                 121                              dc.l    33
+000B2184= 0000001C                 122                              dc.l    28
+000B2188= 00000019                 123                              dc.l    25
+000B218C= 00000016                 124                              dc.l    22
+000B2190                           125                              
+000B2190= 000000C8                 126  EnemyShootingTimeByLevel    dc.l    200
+000B2194= 000000B4                 127                              dc.l    180
+000B2198= 000000AF                 128                              dc.l    175
+000B219C= 000000A5                 129                              dc.l    165
+000B21A0= 0000009B                 130                              dc.l    155
+000B21A4= 00000092                 131                              dc.l    146
+000B21A8= 00000087                 132                              dc.l    135
+000B21AC= 0000007D                 133                              dc.l    125
+000B21B0= 00000073                 134                              dc.l    115
+000B21B4                           135                              
+Line 136 ERROR: Undefined symbol
+000B21B4= 0019F7F8                 136  FuelDepletionByLevel        dc.l    10<<FRACTIONAL_BITS>>1
+Line 137 ERROR: Undefined symbol
+000B21B8= 0019F7F8                 137                              dc.l    11<<FRACTIONAL_BITS>>1
+Line 138 ERROR: Undefined symbol
+000B21BC= 0019F7F8                 138                              dc.l    12<<FRACTIONAL_BITS>>1
+Line 139 ERROR: Undefined symbol
+000B21C0= 0019F7F8                 139                              dc.l    13<<FRACTIONAL_BITS>>1
+Line 140 ERROR: Undefined symbol
+000B21C4= 0019F7F8                 140                              dc.l    14<<FRACTIONAL_BITS>>1
+Line 141 ERROR: Undefined symbol
+000B21C8= 0019F7F8                 141                              dc.l    15<<FRACTIONAL_BITS>>1
+Line 142 ERROR: Undefined symbol
+000B21CC= 0019F7F8                 142                              dc.l    16<<FRACTIONAL_BITS>>1
+Line 143 ERROR: Undefined symbol
+000B21D0= 0019F7F8                 143                              dc.l    17<<FRACTIONAL_BITS>>1
+Line 144 ERROR: Undefined symbol
+000B21D4= 0019F7F8                 144                              dc.l    18<<FRACTIONAL_BITS>>1
+000B21D8                           145  
+000B21D8= 000B2408                 146  StrDifficultyArr            dc.l    StrDifficulty_1
+000B21DC= 000B2419                 147                              dc.l    StrDifficulty_2
+000B21E0= 000B242C                 148                              dc.l    StrDifficulty_3
+000B21E4= 000B243D                 149                              dc.l    StrDifficulty_4
+000B21E8= 000B2453                 150                              dc.l    StrDifficulty_5
+000B21EC= 000B2466                 151                              dc.l    StrDifficulty_6
+000B21F0= 000B247D                 152                              dc.l    StrDifficulty_7
+000B21F4= 000B2493                 153                              dc.l    StrDifficulty_8
+000B21F8= 000B24B1                 154                              dc.l    StrDifficulty_9
+000B21FC                           155  
+000B21FC                           156  * Keycode responses associated with TASK_KEY_INPUT
+000B21FC                           157  KeycodeResponses
+000B21FC                           158  *           $WWAASSDD
+000B21FC= 00000000                 159      dc.l    $00000000
+000B2200= FF000000                 160      dc.l    $FF000000
+000B2204= FF0000FF                 161      dc.l    $FF0000FF
+000B2208= 000000FF                 162      dc.l    $000000FF
+000B220C= 0000FFFF                 163      dc.l    $0000FFFF
+000B2210= 0000FF00                 164      dc.l    $0000FF00
+000B2214= 00FFFF00                 165      dc.l    $00FFFF00
+000B2218= 00FF0000                 166      dc.l    $00FF0000
+000B221C= FFFF0000                 167      dc.l    $FFFF0000
+000B2220                           168  
+000B2220                           169  * Map direction enums to FDeltaX and FDeltaY
+000B2220                           170  FDirectionMapX       
+000B2220= 00000000                 171      dc.l    0
+000B2224= 00000000                 172      dc.l    0
+Line 173 ERROR: Undefined symbol
+000B2228= 0019F7F8                 173      dc.l    FONE_OVER_SQRT_2
+Line 174 ERROR: Undefined symbol
+000B222C= 0019F7F8                 174      dc.l    FONE
+Line 175 ERROR: Undefined symbol
+000B2230= 0019F7F8                 175      dc.l    FONE_OVER_SQRT_2
+000B2234= 00000000                 176      dc.l    0
+Line 177 ERROR: Undefined symbol
+000B2238= 0019F7F8                 177      dc.l    -FONE_OVER_SQRT_2
+Line 178 ERROR: Undefined symbol
+000B223C= 0019F7F8                 178      dc.l    FNEG_ONE
+Line 179 ERROR: Undefined symbol
+000B2240= 0019F7F8                 179      dc.l    -FONE_OVER_SQRT_2
+000B2244                           180      
+000B2244                           181  FDirectionMapY       
+000B2244= 00000000                 182      dc.l    0
+Line 183 ERROR: Undefined symbol
+000B2248= 0019F7F8                 183      dc.l    FNEG_ONE
+Line 184 ERROR: Undefined symbol
+000B224C= 0019F7F8                 184      dc.l    -FONE_OVER_SQRT_2
+000B2250= 00000000                 185      dc.l    0
+Line 186 ERROR: Undefined symbol
+000B2254= 0019F7F8                 186      dc.l    FONE_OVER_SQRT_2
+Line 187 ERROR: Undefined symbol
+000B2258= 0019F7F8                 187      dc.l    FONE
+Line 188 ERROR: Undefined symbol
+000B225C= 0019F7F8                 188      dc.l    FONE_OVER_SQRT_2
+000B2260= 00000000                 189      dc.l    0
+Line 190 ERROR: Undefined symbol
+000B2264= 0019F7F8                 190      dc.l    -FONE_OVER_SQRT_2
+000B2268                           191      
+000B2268= 7E 30 6D 79 33 5B ...    192  SevenSegmentDigitCode   dc.b    $7E, $30, $6D, $79, $33, $5B, $5F, $70, $FF, $7B
+000B2272                           193      
+000B2272= 00 01 01 00 00 00 00     194  SevenSegStartOffsetX    dc.b    0, 1, 1, 0, 0, 0, 0
+000B2279= 00 00 01 02 01 00 01     195  SevenSegStartOffsetY    dc.b    0, 0, 1, 2, 1, 0, 1
+000B2280= 01 01 01 01 00 00 01     196  SevenSegEndOffsetX      dc.b    1, 1, 1, 1, 0, 0, 1
+000B2287= 00 01 02 02 02 01 01     197  SevenSegEndOffsetY      dc.b    0, 1, 2, 2, 2, 1, 1
+000B228E                           198  
+000B228E                           199  * Sounds Effects
+000B228E= 70 6C 61 79 65 72 ...    200  SoundPathPlayerShooting     dc.b    'player_shooting.wav', 0
+000B22A2= 70 6C 61 79 65 72 ...    201  SoundPathPlayerDeath        dc.b    'player_death.wav', 0
+000B22B3= 65 6E 65 6D 79 5F ...    202  SoundPathEnemyDeath         dc.b    'enemy_death.wav', 0
+000B22C3= 70 6F 77 65 72 75 ...    203  SoundPathPowerUpCollected   dc.b    'powerup_collected.wav', 0
+000B22D9= 70 6C 61 79 65 72 ...    204  SoundPathPlayerHurt         dc.b    'player_hurt.wav', 0
+000B22E9= 65 6E 65 6D 79 5F ...    205  SoundPathEnemyShooting      dc.b    'enemy_shooting.wav', 0
+000B22FC                           206  
+000B22FC                           207  * Music
+000B22FC= 6D 61 69 6E 5F 6D ...    208  MusicPathMainMenu           dc.b    'main_menu_music.wav', 0
+000B2310= 67 61 6D 65 6C 6F ...    209  MusicPathGameLoop           dc.b    'gameloop_music.wav', 0
+000B2323= 67 61 6D 65 6F 76 ...    210  MusicPathGameOver           dc.b    'gameover_music.wav', 0
+000B2336                           211  
+Line 212 ERROR: Undefined symbol
+000B2336= F8                       212  MusicArrayIndex             dc.b    MUSIC_MAIN_MENU
+Line 213 ERROR: Undefined symbol
+000B2337= F8                       213                              dc.b    MUSIC_GAMELOOP
+Line 214 ERROR: Undefined symbol
+000B2338= F8                       214                              dc.b    MUSIC_GAMEOVER
+000B2339                           215  
+000B2339                           216  * Moving star background
+000B233A= 00000000                 217  LastStarSpawnTime       dc.l    0
+Line 218 ERROR: Undefined symbol
+000B233E                           218  IsStarActive            ds.b    STAR_LIMIT
+Line 219 ERROR: Undefined symbol
+000B233E                           219  FStarPosX               ds.l    STAR_LIMIT
+Line 220 ERROR: Undefined symbol
+000B233E                           220  FStarPosY               ds.l    STAR_LIMIT
+Line 221 ERROR: Undefined symbol
+000B233E                           221  StarSizes               ds.l    STAR_LIMIT
+Line 222 ERROR: Undefined symbol
+000B233E                           222  StarColors              ds.l    STAR_LIMIT
+Line 223 ERROR: Undefined symbol
+000B233E                           223  FStarSpeed              ds.l    STAR_LIMIT
+000B233E                           224  
+000B233E                           225  * Powerups
+000B233E                           226  
+000B233E                           227  FLastEnemyDeadX         ds.l    1       ; Arguments for power-up spawning
+000B2342                           228  FLastEnemyDeadY         ds.l    1
+000B2346                           229  PowerUpTypeToSpawn      ds.b    1
+000B2347                           230  
+Line 231 ERROR: Undefined symbol
+000B2347                           231  IsPowerUpActive         ds.b    MAX_POWERUPS_ON_SCREEN
+Line 232 ERROR: Undefined symbol
+000B2347                           232  PowerUpType             ds.b    MAX_POWERUPS_ON_SCREEN
+Line 233 ERROR: Undefined symbol
+000B2348                           233  FPowerUpPosX            ds.l    MAX_POWERUPS_ON_SCREEN
+Line 234 ERROR: Undefined symbol
+000B2348                           234  FPowerUpPosY            ds.l    MAX_POWERUPS_ON_SCREEN
+000B2348                           235  
+000B2348                           236  * Powerup UI parameter
+000B2348                           237  PowerUpYOffsetParam     ds.l    1
+000B234C                           238  
+000B234C                           239  * Powerup levels
+000B234C= 00000000                 240  PowerUpMoveSpeedLevel   dc.l    0
+000B2350= 00000000                 241  PowerUpAtkSpeedLevel    dc.l    0
+000B2354= 00000000                 242  PowerUpSpreadLevel      dc.l    0
+000B2358                           243  
+000B2358                           244  * Powerup values
+000B2358                           245  * Must be in sync with POWERUP_MAX_MOVE_SPEED_LEVEL
+Line 246 ERROR: Invalid syntax
+000B2358=                          246  FPowerUpMoveSpeedValues dc.l    4*(FPLAYER_INITIAL_SPEED>>2)
+Line 247 ERROR: Invalid syntax
+000B2358=                          247                          dc.l    5*(FPLAYER_INITIAL_SPEED>>2)    ; Lv1
+Line 248 ERROR: Invalid syntax
+000B2358=                          248                          dc.l    6*(FPLAYER_INITIAL_SPEED>>2)    ; Lv2
+Line 249 ERROR: Invalid syntax
+000B2358=                          249                          dc.l    7*(FPLAYER_INITIAL_SPEED>>2)    ; Lv3
+Line 250 ERROR: Invalid syntax
+000B2358=                          250                          dc.l    8*(FPLAYER_INITIAL_SPEED>>2)    ; Lv4
+Line 251 ERROR: Invalid syntax
+000B2358=                          251                          dc.l    9*(FPLAYER_INITIAL_SPEED>>2)    ; Lv5
+000B2358                           252  
+000B2358                           253  * Must be in sync with POWERUP_MAX_ATK_SPEED_LEVEL
+000B2358                           254  * These values are in hundredth seconds                        
+Line 255 ERROR: Symbol value differs between first and second pass
+000B2358=                          255  PowerUpAtkCdValues      dc.l    50
+000B2358= 0000002E                 256                          dc.l    46    ; Lv1
+000B235C= 0000002A                 257                          dc.l    42    ; Lv2
+000B2360= 00000026                 258                          dc.l    38    ; Lv3
+000B2364= 00000024                 259                          dc.l    36    ; Lv4
+000B2368= 00000021                 260                          dc.l    33    ; Lv5
+000B236C                           261  
+000B236C                           262  * Power-up function array
+Line 263 ERROR: Symbol value differs between first and second pass
+000B236C=                          263  PowerUpFuncs            dc.l    onPowerUpMoveSpeedCollected, onPowerUpAtkSpeedCollected, onPowerUpFuelCollected, onPowerUpSpreadCollected
+000B236C                           264  
+000B236C                           265  * Power-up rendering
+Line 266 ERROR: Symbol value differs between first and second pass
+000B236C=                          266  PowerUpColors           dc.l    COLOR_GREEN, COLOR_RED, COLOR_TAWNY, COLOR_ORANGE
+Line 267 ERROR: Symbol value differs between first and second pass
+000B236C=                          267  PowerUpStrings          dc.l    StrMoveSpeedPowerUp, StrAtkSpeedPowerUp, StrFuelPowerUp, StrSpreadPowerUp
+Line 268 ERROR: Symbol value differs between first and second pass
+000B236C=                          268  PowerUpIconFunc         dc.l    drawMoveSpeedIcon, drawAtkSpeedIcon, drawFuelIcon, drawSpreadIcon
+000B236C                           269  
+000B236C                           270  * Floating Texts
+Line 271 ERROR: Symbol value differs between first and second pass
+000B236C                           271  FloatingTextColorArg    ds.l    1
+Line 272 ERROR: Symbol value differs between first and second pass
+000B236C                           272  FloatingTextPropsArg    ds.l    1
+000B236C                           273  
+Line 274 ERROR: Symbol value differs between first and second pass
+000B236C                           274  IsFloatingTextActive    ds.b    MAX_FLOATING_TEXT
+Line 275 ERROR: Symbol value differs between first and second pass
+000B236C                           275  FloatingTextStrAddr     ds.l    MAX_FLOATING_TEXT
+Line 276 ERROR: Symbol value differs between first and second pass
+000B236C                           276  FFloatingTextX          ds.l    MAX_FLOATING_TEXT
+Line 277 ERROR: Symbol value differs between first and second pass
+000B236C                           277  FFloatingTextY          ds.l    MAX_FLOATING_TEXT
+Line 278 ERROR: Symbol value differs between first and second pass
+000B236C                           278  FloatingTextColors      ds.l    MAX_FLOATING_TEXT
+Line 279 ERROR: Symbol value differs between first and second pass
+000B236C                           279  FloatingTextProps       ds.l    MAX_FLOATING_TEXT
+Line 280 ERROR: Symbol value differs between first and second pass
+000B236C                           280  FloatingTextAge         ds.l    MAX_FLOATING_TEXT       ; In hundredth seconds
+Line 281 ERROR: Symbol value differs between first and second pass
+000B236C                           281  FloatingTextDuration    ds.l    MAX_FLOATING_TEXT       ; In hundredth seconds
+000B236C                           282  
+000B236C                           283  * Strings
+Line 284 ERROR: Symbol value differs between first and second pass
+000B236C= 48 75 6E 67 65 72        284  StrFuel                 dc.b    'Hunger', 0
+Line 285 ERROR: Symbol value differs between first and second pass
+000B2372= 4C 69 76 65 73           285  StrLives                dc.b    'Lives', 0
+000B2377                           286  
+Line 287 ERROR: Symbol value differs between first and second pass
+000B2377= 4D 6F 76 65 6D 65 ...    287  StrMoveSpeedPowerUp     dc.b    'MovementSpeed++', 0
+Line 288 ERROR: Symbol value differs between first and second pass
+000B2386= 46 69 72 65 52 61 ...    288  StrAtkSpeedPowerUp      dc.b    'FireRate++', 0
+Line 289 ERROR: Symbol value differs between first and second pass
+000B2390= 46 75 65 6C 2B 2B        289  StrFuelPowerUp          dc.b    'Fuel++', 0
+Line 290 ERROR: Symbol value differs between first and second pass
+000B2396= 53 70 72 65 61 64 ...    290  StrSpreadPowerUp        dc.b    'Spread++', 0
+000B239E                           291  
+Line 292 ERROR: Symbol value differs between first and second pass
+000B239E= 44 69 66 66 69 63 ...    292  StrDifficulty_1         dc.b    'Difficulty: Easy', 0
+Line 293 ERROR: Symbol value differs between first and second pass
+000B23AE= 44 69 66 66 69 63 ...    293  StrDifficulty_2         dc.b    'Difficulty: Normal', 0
+Line 294 ERROR: Symbol value differs between first and second pass
+000B23C0= 44 69 66 66 69 63 ...    294  StrDifficulty_3         dc.b    'Difficulty: Hard', 0
+Line 295 ERROR: Symbol value differs between first and second pass
+000B23D0= 44 69 66 66 69 63 ...    295  StrDifficulty_4         dc.b    'Difficulty: Very hard', 0
+Line 296 ERROR: Symbol value differs between first and second pass
+000B23E5= 44 69 66 66 69 63 ...    296  StrDifficulty_5         dc.b    'Difficulty: Insane', 0
+Line 297 ERROR: Symbol value differs between first and second pass
+000B23F7= 44 69 66 66 69 63 ...    297  StrDifficulty_6         dc.b    'Difficulty: Impossible', 0
+Line 298 ERROR: Symbol value differs between first and second pass
+000B240D= 44 69 66 66 69 63 ...    298  StrDifficulty_7         dc.b    'Difficulty: I SEE YOU', 0
+Line 299 ERROR: Symbol value differs between first and second pass
+000B2422= 44 69 66 66 69 63 ...    299  StrDifficulty_8         dc.b    'Difficulty: IM COMING FOR YOU', 0
+Line 300 ERROR: Symbol value differs between first and second pass
+000B243F= 44 69 66 66 69 63 ...    300  StrDifficulty_9         dc.b    'Difficulty: HAHAHAHAHAHAHAHAHAHAHAHAHA', 0
+000B2465                           301  
+000B2465                           302  * Sin Calculation
+Line 303 ERROR: Symbol value differs between first and second pass
+000B2466                           303  SinDegreeParam          ds.l    1
+Line 304 ERROR: Symbol value differs between first and second pass
+000B2466                           304  FSinRadianParam         ds.l    1
+Line 305 ERROR: Symbol value differs between first and second pass
+000B2466                           305  SinTable       
+000B2466                           306  *           Value   Angle
+000B2466= 00000000                 307      dc.l    $0      * 0
+000B246A= 0000002C                 308      dc.l    $2C     * 10
+000B246E= 00000058                 309      dc.l    $58     * 20
+000B2472= 00000080                 310      dc.l    $80     * 30
+000B2476= 000000A5                 311      dc.l    $A5     * 40
+000B247A= 000000C4                 312      dc.l    $C4     * 50
+000B247E= 000000DE                 313      dc.l    $DE     * 60
+000B2482= 000000F1                 314      dc.l    $F1     * 70
+000B2486= 000000FC                 315      dc.l    $FC     * 80
+000B248A= 00000100                 316      dc.l    $100    * 90
+000B248E= 000000FC                 317      dc.l    $FC     * 100
+000B2492= 000000F1                 318      dc.l    $F1     * 110
+000B2496= 000000DE                 319      dc.l    $DE     * 120
+000B249A= 000000C4                 320      dc.l    $C4     * 130
+000B249E= 000000A5                 321      dc.l    $A5     * 140
+000B24A2= 00000080                 322      dc.l    $80     * 150
+000B24A6= 00000058                 323      dc.l    $58     * 160
+000B24AA= 0000002C                 324      dc.l    $2C     * 170
+000B24AE= 00000000                 325      dc.l    $0      * 180
+000B24B2= FFFFFFD4                 326      dc.l    -$2C    * 100
+000B24B6= FFFFFFA8                 327      dc.l    -$58    * 200
+000B24BA= FFFFFF80                 328      dc.l    -$80    * 210
+000B24BE= FFFFFF5B                 329      dc.l    -$A5    * 220
+000B24C2= FFFFFF3C                 330      dc.l    -$C4    * 230
+000B24C6= FFFFFF22                 331      dc.l    -$DE    * 240
+000B24CA= FFFFFF0F                 332      dc.l    -$F1    * 250
+000B24CE= FFFFFF04                 333      dc.l    -$FC    * 260
+000B24D2= FFFFFF00                 334      dc.l    -$100   * 270
+000B24D6= FFFFFF04                 335      dc.l    -$FC    * 280
+000B24DA= FFFFFF0F                 336      dc.l    -$F1    * 290
+000B24DE= FFFFFF22                 337      dc.l    -$DE    * 300
+000B24E2= FFFFFF3C                 338      dc.l    -$C4    * 310
+000B24E6= FFFFFF5B                 339      dc.l    -$A5    * 320
+000B24EA= FFFFFF80                 340      dc.l    -$80    * 330
+000B24EE= FFFFFFA8                 341      dc.l    -$58    * 340
+000B24F2= FFFFFFD4                 342      dc.l    -$2C    * 350
+000B24F6= 00000000                 343      dc.l    $0      * 360
+000B24FA                           344  
+000B24FA                           345  
+000B24FA                           346  
+000B24FA                           347  
+000B24FA                           348  
+000B24FA                           349  
+000B24FA                           350  
+000B24FA                           351  
+000B24FA                           352  
+000B24FA                           353  
+000B24FA                           354  
+Line 355 WARNING: END directive missing, starting address not set
+
+92 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BACKGROUNDIMAGE     55A64
+CURRENTFUEL         B2094
+CURRENTFUELGAUGEWIDTH  B209C
+CURRENTPLAYERFRAME  B2062
+DELTATIME           B206C
+DIFFICULTYLEVEL     B2120
+ENEMYCOLORARG       B20E4
+ENEMYCOLORS         B20A4
+ENEMYIMAGE          AE8AE
+ENEMYLEFTXARG       B20E8
+ENEMYMAXTHISGROUP   B20F4
+ENEMYSCOREBOUNTY    B20B4
+ENEMYSHOOTINGTIME   B2118
+ENEMYSHOOTINGTIMEBYLEVEL  B2190
+ENEMYSPAWNEDTHISGROUP  B20F0
+ENEMYSPAWNRATEARRAY  B20FC
+ENEMYTYPES          B20A4
+ENEMYUPPERYARG      B20EC
+FDIRECTIONMAPX      B2220
+FDIRECTIONMAPY      B2244
+FENEMYGROUPRANDOMY  B20F8
+FENEMYPOSX          B20A4
+FENEMYPOSY          B20A4
+FENEMYPROJECTILEVY  B20A4
+FENEMYPROJECTILEX   B20A4
+FENEMYPROJECTILEY   B20A4
+FENEMYSTARTPOSY     B20A4
+FFLOATINGTEXTX      B23D0
+FFLOATINGTEXTY      B23D0
+FLASTENEMYDEADX     B233E
+FLASTENEMYDEADY     B2342
+FLOATINGTEXTAGE     B23D0
+FLOATINGTEXTCOLORARG  B23C8
+FLOATINGTEXTCOLORS  B23D0
+FLOATINGTEXTDURATION  B23D0
+FLOATINGTEXTPROPS   B23D0
+FLOATINGTEXTPROPSARG  B23CC
+FLOATINGTEXTSTRADDR  B23D0
+FPLAYERSPEED        B207E
+FPLAYERX            B2076
+FPLAYERY            B207A
+FPOWERUPMOVESPEEDVALUES  B2358
+FPOWERUPPOSX        B2348
+FPOWERUPPOSY        B2348
+FPROJECTILEPOSX     B210C
+FPROJECTILEPOSY     B210C
+FSINRADIANPARAM     B24DC
+FSTARPOSX           B233E
+FSTARPOSY           B233E
+FSTARSPEED          B233E
+FUELDEPLETIONBYLEVEL  B21B4
+FUELDEPLETIONRATE   B211C
+GAMEOVERIMAGE       8F424
+HOMESCREENIMAGE     0
+ISENEMYALIVE        B20A4
+ISENEMYPROJECTILEACTIVE  B20A4
+ISFLOATINGTEXTACTIVE  B23D0
+ISPLAYERATTACKING   B2070
+ISPOWERUPACTIVE     B2347
+ISPROJECTILEACTIVE  B210C
+ISSTARACTIVE        B233E
+KEYCODERESPONSES    B21FC
+LASTENEMYSHOOTINGTIME  B20A4
+LASTFUELGAUGEWIDTH  B2098
+LASTPLAYERSHOOTINGTIME  B2108
+LASTSTARSPAWNTIME   B233A
+LASTUPDATETIME      B2068
+LOADINGIMAGE        802EE
+MAXENEMY            B2110
+MAXENEMYBYLEVEL     B2148
+MUSICARRAYINDEX     B2336
+MUSICPATHGAMELOOP   B2310
+MUSICPATHGAMEOVER   B2323
+MUSICPATHMAINMENU   B22FC
+PLAYERATTACKCOOLDOWN  B2082
+PLAYERBLINKTIME     B2090
+PLAYERFRAME_1       AF938
+PLAYERFRAME_2       B0642
+PLAYERFRAME_3       B134C
+PLAYERINVULTIME     B208A
+PLAYERLIVES         B2086
+PLAYERPROJTOSPAWN   B210C
+PLAYERSCORE         B2072
+PLAYERSPRITEACTIVE  B208E
+PLAYERSPRITES       B2056
+POWERUPATKCDVALUES  B2370
+POWERUPATKSPEEDLEVEL  B2350
+POWERUPCOLORS       B2398
+POWERUPFUNCS        B2388
+POWERUPICONFUNC     B23B8
+POWERUPMOVESPEEDLEVEL  B234C
+POWERUPSPREADLEVEL  B2354
+POWERUPSTRINGS      B23A8
+POWERUPTYPE         B2347
+POWERUPTYPETOSPAWN  B2346
+POWERUPYOFFSETPARAM  B2348
+SEVENSEGENDOFFSETX  B2280
+SEVENSEGENDOFFSETY  B2287
+SEVENSEGMENTDIGITCODE  B2268
+SEVENSEGSTARTOFFSETX  B2272
+SEVENSEGSTARTOFFSETY  B2279
+SINDEGREEPARAM      B24D8
+SINTABLE            B24E0
+SOUNDPATHENEMYDEATH  B22B3
+SOUNDPATHENEMYSHOOTING  B22E9
+SOUNDPATHPLAYERDEATH  B22A2
+SOUNDPATHPLAYERHURT  B22D9
+SOUNDPATHPLAYERSHOOTING  B228E
+SOUNDPATHPOWERUPCOLLECTED  B22C3
+STARCOLORS          B233E
+STARSIZES           B233E
+STRATKSPEEDPOWERUP  B23ED
+STRDIFFICULTYARR    B21D8
+STRDIFFICULTY_1     B2408
+STRDIFFICULTY_2     B2419
+STRDIFFICULTY_3     B242C
+STRDIFFICULTY_4     B243D
+STRDIFFICULTY_5     B2453
+STRDIFFICULTY_6     B2466
+STRDIFFICULTY_7     B247D
+STRDIFFICULTY_8     B2493
+STRDIFFICULTY_9     B24B1
+STRENEMYSCOREBOUNTYARR  B20C4
+STRENEMYSCOREBOUNTY_1  B20D4
+STRENEMYSCOREBOUNTY_2  B20D7
+STRENEMYSCOREBOUNTY_3  B20DB
+STRENEMYSCOREBOUNTY_4  B20DF
+STRFUEL             B23D0
+STRFUELPOWERUP      B23F8
+STRLIVES            B23D7
+STRMOVESPEEDPOWERUP  B23DD
+STRSPREADPOWERUP    B23FF
+TIMESINCELASTENEMYSPAWNED  B20A0
+TIMESINCELASTPLAYERFRAME  B2064
+TIMESINCESTARTGAME  B2124
+TIMETOCHANGEDIFFICULTY  B2128
+TIMETOSPAWNENEMY    B2114
+TIMETOSPAWNENEMYBYLEVEL  B216C
+TUTORIALSCREENIMAGE  2AD32

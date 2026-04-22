@@ -1,0 +1,519 @@
+00003000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/6/2024 6:24:27 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Bitmap Subroutine
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 5/30/2024
+00000000                             5  * Description: Reading pixels from bitmaps to display. Most cycles will be running here.
+00000000                             6  *              Note that subroutines' parameters here are passed in stack, not registers.
+00000000                             7  *-----------------------------------------------------------
+00000000                             8  
+00000000  =0000FF00                  9  GREEN_SCREEN_COLOR      equ $FF00
+00000000                            10      
+00000000                            11  displayBitmap:
+00000000                            12  * Fully display a bitmap at X_SCREEN, Y_SCREEN coordinates
+00000000                            13  * Benchmark: 356 cycles pre-draw
+00000000                            14  
+00000000                            15  *   ARGUMENTS:
+00000000                            16  
+00000000                            17  *   BMP_ADDR                                Pointer to .bmp file
+00000000                            18  *   X_SCREEN, Y_SCREEN                      (x, y) top left corner of the output screen to display
+00000000                            19  
+00000000                            20  * Registers used: A1, D0-D2, D5-D7
+00000000                            21  
+00000000                            22  * Move pass the return address
+00000000  588F                      23      add.l   #4, sp
+00000002                            24  
+00000002                            25  * Load the bmp pointer argument
+Line 26 ERROR: Undefined symbol
+00000002  226F BD16                 26      move.l  BMP_ADDR(sp), a1
+00000006                            27  
+00000006                            28  * Assume BM header with 40 bytes DIB header (BITMAPINFOHEADER)
+00000006                            29  * Extract width (offset = 18)
+00000006  2429 0012                 30      move.l  18(a1), d2
+0000000A  E05A                      31      ror.w   #8, d2
+0000000C  4842                      32      swap    d2
+0000000E  E05A                      33      ror.w   #8, d2      ; Convert little to big endian
+Line 34 ERROR: Undefined symbol
+00000010  2F42 55B8                 34      move.l  d2, VAR_IMAGE_WIDTH(sp)
+00000014                            35      
+00000014                            36  * Extract height (offset = 22)
+00000014  2429 0016                 37      move.l  22(a1), d2
+00000018  E05A                      38      ror.w   #8, d2
+0000001A  4842                      39      swap    d2
+0000001C  E05A                      40      ror.w   #8, d2      ; Convert little to big endian
+Line 41 ERROR: Undefined symbol
+0000001E  2F42 55B8                 41      move.l  d2, VAR_IMAGE_HEIGHT(sp)
+00000022                            42  
+00000022                            43  * Move to the starting pixel storage
+00000022                            44  * The starting offset value is stored at byte 0x0A (10 in dec) of the file
+00000022  2029 000A                 45      move.l  10(a1), d0 
+00000026  E058                      46      ror.w   #8, d0
+00000028  4840                      47      swap    d0
+0000002A  E058                      48      ror.w   #8, d0      ; Convert little to big endian
+0000002C                            49      
+0000002C  D3C0                      50      add.l   d0, a1      ; Move
+0000002E                            51      
+0000002E                            52  * Can start reading the pixels here
+0000002E                            53  * Should read from bottom left, to right, then up
+0000002E                            54  * Init drawing positions, d6=x, d7=y
+Line 55 ERROR: Undefined symbol
+0000002E  2C2F BD16                 55      move.l  X_SCREEN(sp), d6            ; X starts from X_SCREEN
+Line 56 ERROR: Undefined symbol
+00000032  2E2F BD16                 56      move.l  Y_SCREEN(sp), d7
+Line 57 ERROR: Undefined symbol
+00000036  DEAF BD16                 57      add.l   VAR_IMAGE_HEIGHT(sp), d7
+0000003A  5387                      58      sub.l   #1, d7                      ; Y starts from LowerY = Y_SCREEN + ImageHeight - 1
+0000003C                            59  
+Line 60 ERROR: Undefined symbol
+0000003C  2A2F BD16                 60      move.l  X_SCREEN(sp), d5
+Line 61 ERROR: Undefined symbol
+00000040  DAAF BD16                 61      add.l   VAR_IMAGE_WIDTH(sp), d5
+00000044  5385                      62      sub.l   #1, d5                      ; RightX = X_SCREEN + ImageWidth - 1
+00000046                            63  
+00000046                            64  verticalLoop:
+Line 65 ERROR: Undefined symbol
+00000046  2C2F BD16                 65      move.l  X_SCREEN(sp), d6            ; Reset current X
+0000004A                            66      
+0000004A                            67  horizontalLoop:
+0000004A                            68  * Set the pen color for 32 bits
+0000004A  4281                      69      clr.l   d1
+0000004C  2219                      70      move.l  (a1)+, d1   ; BBGGRR00
+0000004E  E089                      71      lsr.l   #8, d1
+00000050                            72  
+00000050                            73  * By this line the pen color should be set in D1 from 24/32-bit color reading above
+Line 74 ERROR: Undefined symbol
+00000050  203C 004DBD16             74      move.l  #TASK_SET_PEN_COLOR, d0
+00000056  4E4F                      75      trap    #15
+00000058                            76  
+00000058                            77  * Draw the pixel here
+00000058  3206                      78      move.w  d6, d1      ; X
+0000005A  3407                      79      move.w  d7, d2      ; Y
+Line 80 ERROR: Undefined symbol
+0000005C  203C 004DBD16             80      move.l  #TASK_DRAW_PIXEL, d0
+00000062  4E4F                      81      trap    #15
+00000064                            82      
+00000064  5286                      83      add.l   #1, d6      ; Move pen right
+00000066                            84      
+00000066                            85  * Go to the upper row when X > RightX
+00000066  BC85                      86      cmp.l   d5, d6
+00000068  6FE0                      87      ble     horizontalLoop
+0000006A                            88      
+0000006A                            89  * New row here
+0000006A  5387                      90      sub.l   #1, d7          ; Move pen up
+0000006C                            91      
+Line 92 ERROR: Undefined symbol
+0000006C  BEAF BD16                 92      cmp.l   Y_SCREEN(sp), d7
+00000070  6CD4                      93      bge     verticalLoop    ; Ends when Y < Y_SCREEN = UpperY
+00000072                            94  
+00000072                            95  * Move back to the return address
+00000072  598F                      96      sub.l   #4, sp
+00000074  4E75                      97      rts
+00000076                            98      
+00000076                            99  displayBitmapCenter:
+00000076                           100  * Fully display a bitmap at X_SCREEN, Y_SCREEN coordinates with those coordinates being the center of the image
+00000076                           101  
+00000076                           102  *   ARGUMENTS:
+00000076                           103  
+00000076                           104  *   BMP_ADDR                                Pointer to .bmp file
+00000076                           105  *   X_SCREEN, Y_SCREEN                  (x, y) center of the output screen to display
+00000076                           106  
+00000076                           107  * Registers used: A1, D0-D2, D4-D7
+00000076                           108  
+00000076                           109  * Move pass the return address
+00000076  588F                     110      add.l   #4, sp
+00000078                           111  
+00000078                           112  * Load the bmp pointer argument
+Line 113 ERROR: Undefined symbol
+00000078  226F BD16                113      move.l  BMP_ADDR(sp), a1
+0000007C                           114  
+0000007C                           115  * Assume BM header with 40 bytes DIB header (BITMAPINFOHEADER)
+0000007C                           116  * Extract width (offset = 18)
+0000007C  2429 0012                117      move.l  18(a1), d2
+00000080  E05A                     118      ror.w   #8, d2
+00000082  4842                     119      swap    d2
+00000084  E05A                     120      ror.w   #8, d2      ; Convert little to big endian
+Line 121 ERROR: Undefined symbol
+00000086  2F42 55B8                121      move.l  d2, VAR_IMAGE_WIDTH(sp)
+0000008A                           122      
+0000008A                           123  * Extract height (offset = 22)
+0000008A  2429 0016                124      move.l  22(a1), d2
+0000008E  E05A                     125      ror.w   #8, d2
+00000090  4842                     126      swap    d2
+00000092  E05A                     127      ror.w   #8, d2      ; Convert little to big endian
+Line 128 ERROR: Undefined symbol
+00000094  2F42 55B8                128      move.l  d2, VAR_IMAGE_HEIGHT(sp)
+00000098                           129  
+00000098                           130  * Move to the starting pixel storage
+00000098                           131  * The starting offset value is stored at byte 0x0A (10 in dec) of the file
+00000098  2029 000A                132      move.l  10(a1), d0 
+0000009C  E058                     133      ror.w   #8, d0
+0000009E  4840                     134      swap    d0
+000000A0  E058                     135      ror.w   #8, d0      ; Convert little to big endian
+000000A2                           136      
+000000A2  D3C0                     137      add.l   d0, a1      ; Move
+000000A4                           138      
+000000A4                           139  * Can start reading the pixels here
+000000A4                           140  * Should read from bottom left, to right, then up
+000000A4                           141  * Init drawing positions, d6=x, d7=y
+Line 142 ERROR: Undefined symbol
+000000A4  2C2F BD16                142      move.l  X_SCREEN(sp), d6            
+Line 143 ERROR: Undefined symbol
+000000A8  202F BD16                143      move.l  VAR_IMAGE_WIDTH(sp), d0
+000000AC  E288                     144      lsr.l   #1, d0
+000000AE  9C80                     145      sub.l   d0, d6                      ; X starts from LeftX = X_SCREEN - ImageWidth/2
+000000B0                           146      
+Line 147 ERROR: Undefined symbol
+000000B0  2E2F BD16                147      move.l  Y_SCREEN(sp), d7
+Line 148 ERROR: Undefined symbol
+000000B4  202F BD16                148      move.l  VAR_IMAGE_HEIGHT(sp), d0
+000000B8  E288                     149      lsr.l   #1, d0
+000000BA  DE80                     150      add.l   d0, d7
+000000BC  5387                     151      sub.l   #1, d7                      ; Y starts from LowerY = Y_SCREEN + ImageHeight/2 - 1
+000000BE                           152  
+000000BE  2A06                     153      move.l  d6, d5
+Line 154 ERROR: Undefined symbol
+000000C0  202F BD16                154      move.l  VAR_IMAGE_WIDTH(sp), d0
+000000C4  DA80                     155      add.l   d0, d5     
+000000C6  5385                     156      sub.l   #1, d5                      ; RightX = LeftX + ImageWidth - 1
+000000C8                           157      
+000000C8  2807                     158      move.l  d7, d4                      
+Line 159 ERROR: Undefined symbol
+000000CA  98AF BD16                159      sub.l   VAR_IMAGE_HEIGHT(sp), d4    
+000000CE  5284                     160      add.l   #1, d4                      ; UpperY = LowerY - ImageHeight + 1
+000000D0                           161  
+000000D0                           162  verticalCenterLoop:
+Line 163 ERROR: Undefined symbol
+000000D0  2C2F BD16                163      move.l  X_SCREEN(sp), d6            
+Line 164 ERROR: Undefined symbol
+000000D4  202F BD16                164      move.l  VAR_IMAGE_WIDTH(sp), d0
+000000D8  E288                     165      lsr.l   #1, d0
+000000DA  9C80                     166      sub.l   d0, d6      ; Reset current X
+000000DC                           167      
+000000DC                           168  horizontalCenterLoop:
+000000DC                           169  * Set the pen color for 32 bits
+000000DC  4281                     170      clr.l   d1
+000000DE  2219                     171      move.l  (a1)+, d1   ; BBGGRR00
+000000E0  E089                     172      lsr.l   #8, d1
+000000E2                           173  
+000000E2                           174  * By this line the pen color should be set in D1 from 24/32-bit color reading above
+Line 175 ERROR: Undefined symbol
+000000E2  203C 004DBD16            175      move.l  #TASK_SET_PEN_COLOR, d0
+000000E8  4E4F                     176      trap    #15
+000000EA                           177  
+000000EA                           178  * Draw the pixel here
+000000EA  3206                     179      move.w  d6, d1      ; X
+000000EC  3407                     180      move.w  d7, d2      ; Y
+Line 181 ERROR: Undefined symbol
+000000EE  203C 004DBD16            181      move.l  #TASK_DRAW_PIXEL, d0
+000000F4  4E4F                     182      trap    #15
+000000F6                           183      
+000000F6  5286                     184      add.l   #1, d6      ; Move pen right
+000000F8                           185      
+000000F8                           186  * Go to the upper row when X > RightX
+000000F8  BC85                     187      cmp.l   d5, d6
+000000FA  6FE0                     188      ble     horizontalCenterLoop
+000000FC                           189      
+000000FC                           190  * New row here
+000000FC  5387                     191      sub.l   #1, d7          ; Move pen up
+000000FE                           192      
+000000FE  BE84                     193      cmp.l   d4, d7
+00000100  6CCE                     194      bge     verticalCenterLoop  ; Ends when Y < UpperY
+00000102                           195  
+00000102                           196  * Move back to the return address
+00000102  598F                     197      sub.l   #4, sp
+00000104  4E75                     198      rts
+00000106                           199  
+00000106                           200  
+00000106                           201  displayTransparentBitmap:
+00000106                           202  * Fully display a green screened bitmap at X_SCREEN, Y_SCREEN coordinates
+00000106                           203  *   ARGUMENTS:
+00000106                           204  
+00000106                           205  *   BMP_ADDR                                Pointer to .bmp file
+00000106                           206  *   X_SCREEN, Y_SCREEN                      (x, y) top left corner of the output screen to display
+00000106                           207  
+00000106                           208  * Registers used: A1, D0-D2, D5-D7
+00000106                           209  
+00000106                           210  * Move pass the return address
+00000106  588F                     211      add.l   #4, sp
+00000108                           212  
+00000108                           213  * Load the bmp pointer argument
+Line 214 ERROR: Undefined symbol
+00000108  226F BD16                214      move.l  BMP_ADDR(sp), a1
+0000010C                           215  
+0000010C                           216  * Assume BM header with 40 bytes DIB header (BITMAPINFOHEADER)
+0000010C                           217  * Extract width (offset = 18)
+0000010C  2429 0012                218      move.l  18(a1), d2
+00000110  E05A                     219      ror.w   #8, d2
+00000112  4842                     220      swap    d2
+00000114  E05A                     221      ror.w   #8, d2      ; Convert little to big endian
+Line 222 ERROR: Undefined symbol
+00000116  2F42 55B8                222      move.l  d2, VAR_IMAGE_WIDTH(sp)
+0000011A                           223      
+0000011A                           224  * Extract height (offset = 22)
+0000011A  2429 0016                225      move.l  22(a1), d2
+0000011E  E05A                     226      ror.w   #8, d2
+00000120  4842                     227      swap    d2
+00000122  E05A                     228      ror.w   #8, d2      ; Convert little to big endian
+Line 229 ERROR: Undefined symbol
+00000124  2F42 55B8                229      move.l  d2, VAR_IMAGE_HEIGHT(sp)
+00000128                           230  
+00000128                           231  * Move to the starting pixel storage
+00000128                           232  * The starting offset value is stored at byte 0x0A (10 in dec) of the file
+00000128  2029 000A                233      move.l  10(a1), d0 
+0000012C  E058                     234      ror.w   #8, d0
+0000012E  4840                     235      swap    d0
+00000130  E058                     236      ror.w   #8, d0      ; Convert little to big endian
+00000132                           237      
+00000132  D3C0                     238      add.l   d0, a1      ; Move
+00000134                           239      
+00000134                           240  * Can start reading the pixels here
+00000134                           241  * Should read from bottom left, to right, then up
+00000134                           242  * Init drawing positions, d6=x, d7=y
+Line 243 ERROR: Undefined symbol
+00000134  2C2F BD16                243      move.l  X_SCREEN(sp), d6            ; X starts from X_SCREEN
+Line 244 ERROR: Undefined symbol
+00000138  2E2F BD16                244      move.l  Y_SCREEN(sp), d7
+Line 245 ERROR: Undefined symbol
+0000013C  DEAF BD16                245      add.l   VAR_IMAGE_HEIGHT(sp), d7
+00000140  5387                     246      sub.l   #1, d7                      ; Y starts from LowerY = Y_SCREEN + ImageHeight - 1
+00000142                           247  
+Line 248 ERROR: Undefined symbol
+00000142  2A2F BD16                248      move.l  X_SCREEN(sp), d5
+Line 249 ERROR: Undefined symbol
+00000146  DAAF BD16                249      add.l   VAR_IMAGE_WIDTH(sp), d5
+0000014A  5385                     250      sub.l   #1, d5                      ; RightX = X_SCREEN + ImageWidth - 1
+0000014C                           251  
+0000014C                           252  verticalTransparentLoop:
+Line 253 ERROR: Undefined symbol
+0000014C  2C2F BD16                253      move.l  X_SCREEN(sp), d6            ; Reset current X
+00000150                           254      
+00000150                           255  horizontalTransparentLoop:
+00000150                           256  * Set the pen color for 32 bits
+00000150  4281                     257      clr.l   d1
+00000152  70FF                     258      move.l  #-1, d0
+Line 259 ERROR: Comma expected
+00000154                           259      move.l  (a1, d0)+, d1   ; BBGGRR00
+00000154  E089                     260      lsr.l   #8, d1
+00000156                           261  
+00000156                           262  * If the color is pure green, don't draw
+00000156  B2BC 0000FF00            263      cmp.l   #GREEN_SCREEN_COLOR, d1
+0000015C  6700 0016                264      beq     skipDrawing
+00000160                           265  
+00000160                           266  * By this line the pen color should be set in D1 from 24/32-bit color reading above
+Line 267 ERROR: Undefined symbol
+00000160  203C 004DBD16            267      move.l  #TASK_SET_PEN_COLOR, d0
+00000166  4E4F                     268      trap    #15
+00000168                           269  
+00000168                           270  * Draw the pixel here
+00000168  3206                     271      move.w  d6, d1      ; X
+0000016A  3407                     272      move.w  d7, d2      ; Y
+Line 273 ERROR: Undefined symbol
+0000016C  203C 004DBD16            273      move.l  #TASK_DRAW_PIXEL, d0
+00000172  4E4F                     274      trap    #15
+00000174                           275  
+00000174                           276  skipDrawing:
+00000174  5286                     277      add.l   #1, d6      ; Move pen right
+00000176                           278      
+00000176                           279  * Go to the upper row when X > RightX
+00000176  BC85                     280      cmp.l   d5, d6
+00000178  6FD6                     281      ble     horizontalTransparentLoop
+0000017A                           282      
+0000017A                           283  * New row here
+0000017A  5387                     284      sub.l   #1, d7          ; Move pen up
+0000017C                           285      
+Line 286 ERROR: Undefined symbol
+0000017C  BEAF BD16                286      cmp.l   Y_SCREEN(sp), d7
+00000180  6CCA                     287      bge     verticalTransparentLoop ; Ends when Y < Y_SCREEN = UpperY
+00000182                           288  
+00000182                           289  * Move back to the return address
+00000182  598F                     290      sub.l   #4, sp
+00000184  4E75                     291      rts
+00000186                           292  
+00000186                           293  
+00000186                           294  displayBitmapChunk:
+00000186                           295  * Pre-draw
+00000186                           296  * Unoptimized: 846 cycles
+00000186                           297  * No argument correcting/bit extraction: 744 cycles
+00000186                           298  
+00000186                           299  * Cycles per pixel
+00000186                           300  * Unoptimized: 116 cycles 
+00000186                           301  * 32bit-only: 82 cycles
+00000186                           302  
+00000186                           303  *   ARGUMENTS:
+00000186                           304  
+00000186                           305  *   BMP_ADDR                                Pointer to .bmp file
+00000186                           306  *   X_BMP, Y_BMP                            (x, y) top left corner of the bitmap to start displaying. 
+00000186                           307  *   WIDTH_TO_DISPLAY, HEIGHT_TO_DISPLAY     (Width, height) of the bitmap to display.
+00000186                           308  *   X_SCREEN, Y_SCREEN                      (x, y) top left corner of the output screen to display
+00000186                           309  
+00000186                           310  * Registers used: A1, D0-D7
+00000186                           311  
+00000186                           312  * Move pass the return address
+00000186  588F                     313      add.l   #4, sp
+00000188                           314  
+00000188                           315  * Load the bmp pointer argument
+Line 316 ERROR: Undefined symbol
+00000188  226F BD16                316      move.l  BMP_ADDR(sp), a1
+0000018C                           317  
+0000018C                           318  * Assume BM header with 40 bytes DIB header (BITMAPINFOHEADER)
+0000018C                           319  * Extract width (offset = 18)
+0000018C  2429 0012                320      move.l  18(a1), d2
+00000190  E05A                     321      ror.w   #8, d2
+00000192  4842                     322      swap    d2
+00000194  E05A                     323      ror.w   #8, d2      ; Convert little to big endian
+Line 324 ERROR: Undefined symbol
+00000196  2F42 55B8                324      move.l  d2, VAR_IMAGE_WIDTH(sp)
+0000019A                           325      
+0000019A                           326  * Extract height (offset = 22)
+0000019A  2429 0016                327      move.l  22(a1), d2
+0000019E  E05A                     328      ror.w   #8, d2
+000001A0  4842                     329      swap    d2
+000001A2  E05A                     330      ror.w   #8, d2      ; Convert little to big endian
+Line 331 ERROR: Undefined symbol
+000001A4  2F42 55B8                331      move.l  d2, VAR_IMAGE_HEIGHT(sp)
+000001A8                           332  
+000001A8                           333  * Move to the starting pixel storage
+000001A8                           334  * The starting offset value is stored at byte 0x0A (10 in dec) of the file
+000001A8  2029 000A                335      move.l  10(a1), d0 
+000001AC  E058                     336      ror.w   #8, d0
+000001AE  4840                     337      swap    d0
+000001B0  E058                     338      ror.w   #8, d0      ; Convert little to big endian
+000001B2                           339      
+000001B2  D3C0                     340      add.l   d0, a1      ; Move
+000001B4                           341      
+000001B4                           342  * Now move to the pixel we want to start drawing
+000001B4                           343  * The number of bytes to move to the true starting point is by the following formula:
+000001B4                           344  * X_BMP * BytePerPixel + (ImageHeight - HEIGHT_TO_DISPLAY - Y_BMP) * Floor(ImageWidth * BytePerPixel / 4 + 3) * 4
+Line 345 ERROR: Undefined symbol
+000001B4  202F BD16                345      move.l  X_BMP(sp), d0
+Line 346 ERROR: Undefined symbol
+000001B8  223C 004DBD16            346      move.l  #BYTES_PER_PIXEL, d1
+000001BE  C0C1                     347      mulu.w  d1, d0                          ; X_BMP * BytePerPixel
+000001C0                           348      
+Line 349 ERROR: Undefined symbol
+000001C0  222F BD16                349      move.l  VAR_IMAGE_HEIGHT(sp), d1
+Line 350 ERROR: Undefined symbol
+000001C4  92AF BD16                350      sub.l   HEIGHT_TO_DISPLAY(sp), d1
+Line 351 ERROR: Undefined symbol
+000001C8  92AF BD16                351      sub.l   Y_BMP(sp), d1                   ; (ImageHeight - HEIGHT_TO_DISPLAY - Y_BMP)
+000001CC                           352      
+Line 353 ERROR: Undefined symbol
+000001CC  242F BD16                353      move.l  VAR_IMAGE_WIDTH(sp), d2
+Line 354 ERROR: Undefined symbol
+000001D0  263C 004DBD16            354      move.l  #BYTES_PER_PIXEL, d3
+000001D6  C4C3                     355      mulu.w  d3, d2
+000001D8  5682                     356      add.l   #3, d2
+000001DA  E48A                     357      lsr.l   #2, d2
+000001DC  E58A                     358      lsl.l   #2, d2                          ; Floor(ImageWidth * BytePerPixel / 4 + 3) * 4
+000001DE                           359      
+000001DE  C2C2                     360      mulu.w  d2, d1
+000001E0  D081                     361      add.l   d1, d0
+000001E2                           362      
+000001E2  D3C0                     363      add.l   d0, a1                          ; Move
+000001E4                           364      
+000001E4                           365  * When moving to the upper row, the amount of bytes to move is by the following formula:
+000001E4                           366  * Floor(ImageWidth * BytePerPixel / 4 + 3) * 4 - WIDTH_TO_DISPLAY * BytePerPixel
+000001E4                           367  * Do this outside the loop to save cycles
+Line 368 ERROR: Undefined symbol
+000001E4  202F BD16                368      move.l  WIDTH_TO_DISPLAY(sp), d0
+Line 369 ERROR: Undefined symbol
+000001E8  223C 004DBD16            369      move.l  #BYTES_PER_PIXEL, d1
+000001EE  C0C1                     370      mulu.w  d1, d0
+000001F0  9480                     371      sub.l   d0, d2                          ; D2 is from the starting point calculation earlier
+000001F2  2802                     372      move.l  d2, d4                          ; Save for using in the loop as D4 is currently unused in this scope
+000001F4                           373      
+000001F4                           374  * Can start reading the pixels here
+000001F4                           375  * Should read from bottom left, to right, then up
+000001F4                           376  * Init drawing positions, d6=x, d7=y
+Line 377 ERROR: Undefined symbol
+000001F4  2C2F BD16                377      move.l  X_SCREEN(sp), d6            ; X starts from X_SCREEN
+Line 378 ERROR: Undefined symbol
+000001F8  2E2F BD16                378      move.l  Y_SCREEN(sp), d7
+Line 379 ERROR: Undefined symbol
+000001FC  DEAF BD16                379      add.l   HEIGHT_TO_DISPLAY(sp), d7
+00000200  5387                     380      sub.l   #1, d7                      ; Y starts from LowerY = Y_SCREEN + HEIGHT_TO_DISPLAY - 1
+00000202                           381  
+Line 382 ERROR: Undefined symbol
+00000202  2A2F BD16                382      move.l  X_SCREEN(sp), d5
+Line 383 ERROR: Undefined symbol
+00000206  DAAF BD16                383      add.l   WIDTH_TO_DISPLAY(sp), d5
+0000020A  5385                     384      sub.l   #1, d5                      ; RightX = X_SCREEN + WIDTH_TO_DISPLAY - 1
+0000020C                           385  
+0000020C                           386  verticalLoopChunk:
+Line 387 ERROR: Undefined symbol
+0000020C  2C2F BD16                387      move.l  X_SCREEN(sp), d6            ; Reset current X
+00000210                           388      
+00000210                           389  horizontalLoopChunk:
+00000210                           390  * Set the pen color for 32 bits
+00000210  4281                     391      clr.l   d1
+00000212  2219                     392      move.l  (a1)+, d1   ; BBGGRR00
+00000214  E089                     393      lsr.l   #8, d1
+00000216                           394  
+00000216                           395  * By this line the pen color should be set in D1 from 24/32-bit color reading above
+Line 396 ERROR: Undefined symbol
+00000216  203C 004DBD16            396      move.l  #TASK_SET_PEN_COLOR, d0
+0000021C  4E4F                     397      trap    #15
+0000021E                           398  
+0000021E                           399  * Draw the pixel here
+0000021E  3206                     400      move.w  d6, d1      ; X
+00000220  3407                     401      move.w  d7, d2      ; Y
+Line 402 ERROR: Undefined symbol
+00000222  203C 004DBD16            402      move.l  #TASK_DRAW_PIXEL, d0
+00000228  4E4F                     403      trap    #15
+0000022A                           404      
+0000022A  5286                     405      add.l   #1, d6      ; Move pen right
+0000022C                           406      
+0000022C                           407  * Go to the upper row when X > RightX
+0000022C  BC85                     408      cmp.l   d5, d6
+0000022E  6FE0                     409      ble     horizontalLoopChunk
+00000230                           410      
+00000230                           411  * New row here
+00000230  D3C4                     412      add.l   d4, a1          ; Need to skip by D4 bytes, as calculated outside the loop earlier
+00000232  5387                     413      sub.l   #1, d7          ; Move pen up
+00000234                           414      
+Line 415 ERROR: Undefined symbol
+00000234  BEAF BD16                415      cmp.l   Y_SCREEN(sp), d7
+00000238  6CD2                     416      bge     verticalLoopChunk   ; Ends when Y < Y_SCREEN = UpperY
+0000023A                           417  
+0000023A                           418  * Move back to the return address
+0000023A  598F                     419      sub.l   #4, sp
+0000023C  4E75                     420      rts
+0000023E                           421  
+0000023E                           422  
+0000023E                           423  
+0000023E                           424  
+0000023E                           425  
+0000023E                           426  
+0000023E                           427  
+0000023E                           428  
+0000023E                           429  
+0000023E                           430  
+0000023E                           431  
+0000023E                           432  
+0000023E                           433  
+Line 434 WARNING: END directive missing, starting address not set
+
+59 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+DISPLAYBITMAP       0
+DISPLAYBITMAPCENTER  76
+DISPLAYBITMAPCHUNK  186
+DISPLAYTRANSPARENTBITMAP  106
+GREEN_SCREEN_COLOR  FF00
+HORIZONTALCENTERLOOP  DC
+HORIZONTALLOOP      4A
+HORIZONTALLOOPCHUNK  210
+HORIZONTALTRANSPARENTLOOP  150
+SKIPDRAWING         174
+VERTICALCENTERLOOP  D0
+VERTICALLOOP        46
+VERTICALLOOPCHUNK   20C
+VERTICALTRANSPARENTLOOP  14C

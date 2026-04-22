@@ -1,0 +1,398 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/12/2024 12:40:42 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Powerups
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/7/2024
+00000000                             5  * Description: Occasionally spawn powerups when enemies are killed.
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  * Powerup ideas
+00000000                             9  * - Piercing projectiles
+00000000                            10  * - Player movement speed increase
+00000000                            11  * - Player attack speed increase
+00000000                            12  
+00000000                            13  initializePowerUpSystem:
+00000000  4EB9 0000000E             14      jsr     initializePowerUpLevels
+00000006  4EB9 00000034             15      jsr     initializeIsPowerUpActive
+0000000C  4E75                      16      rts
+0000000E                            17  
+0000000E                            18  initializePowerUpLevels:
+0000000E                            19  * Set every power-up level to 0, and update the values accordingly
+Line 20 ERROR: Undefined symbol
+0000000E  23FC 00000000 005455B8    20      move.l  #0, PowerUpMoveSpeedLevel
+Line 21 ERROR: Undefined symbol
+00000018  23FC 00000000 005455B8    21      move.l  #0, PowerUpAtkSpeedLevel
+Line 22 ERROR: Undefined symbol
+00000022  23FC 00000000 005455B8    22      move.l  #0, PowerUpSpreadLevel
+0000002C  4EB9 0000016C             23      jsr     updatePowerUpValues
+00000032  4E75                      24      rts
+00000034                            25  
+00000034                            26  initializeIsPowerUpActive:
+00000034                            27  * Loop through the IsPowerUpActive array and set them to inactive
+00000034                            28  * Registers used: D0, A1
+Line 29 ERROR: Undefined symbol
+00000034  43F9 004DBD16             29      lea     IsPowerUpActive, a1
+Line 30 ERROR: Comma expected
+0000003A                            30      move.l  #MAX_POWERUPS_ON_SCREEN-1, d0
+0000003A                            31      
+Line 32 ERROR: Symbol value differs between first and second pass
+0000003A                            32  initIsPowerUpActiveLoop:
+Line 33 ERROR: Undefined symbol
+0000003A  12FC 0016                 33      move.b  #POWERUP_STATUS_INACTIVE, (a1)+
+0000003E  51C8 0000                 34      dbra    d0, initIsPowerUpActiveLoop
+00000042                            35      
+00000042  4E75                      36      rts
+00000044                            37      
+Line 38 ERROR: Symbol value differs between first and second pass
+00000044                            38  onPowerUpMoveSpeedCollected:
+00000044  4EB9 00000118             39      jsr     spawnPowerUpFloatingText        ; Needs D1 as true power-up index to look-up string
+0000004A  4EB9 00000082             40      jsr     increasePowerUpMoveSpeedLevel
+00000050  4E75                      41      rts
+00000052                            42      
+Line 43 ERROR: Symbol value differs between first and second pass
+00000052                            43  onPowerUpAtkSpeedCollected:
+00000052  4EB9 00000118             44      jsr     spawnPowerUpFloatingText        ; Needs D1 as true power-up index to look-up string
+00000058  4EB9 000000AA             45      jsr     increasePowerUpAtkSpeedLevel
+0000005E  4E75                      46      rts
+00000060                            47      
+Line 48 ERROR: Symbol value differs between first and second pass
+00000060                            48  onPowerUpFuelCollected:
+00000060  4EB9 00000118             49      jsr     spawnPowerUpFloatingText        ; Needs D1 as true power-up index to look-up string
+00000066  4EB9 000000D2             50      jsr     increasePowerUpFuel
+0000006C  4E75                      51      rts
+0000006E                            52      
+Line 53 ERROR: Symbol value differs between first and second pass
+0000006E                            53  onPowerUpSpreadCollected:
+0000006E  4EB9 00000118             54      jsr     spawnPowerUpFloatingText
+00000074  4EB9 000000F6             55      jsr     increasePowerUpSpreadLevel
+0000007A  4E75                      56      rts
+0000007C                            57  
+Line 58 ERROR: Symbol value differs between first and second pass
+0000007C                            58  increasePowerUpMoveSpeedLevel:
+0000007C                            59  * Increase the move speed power-up level by 1, doesn't do anything if is at max
+Line 60 ERROR: Invalid syntax
+0000007C                            60      sub.l   #LONG_OFFSET*15, sp
+Line 61 ERROR: Undefined symbol
+0000007C                            61      movem.l ALL_REG, (sp)
+0000007C                            62  
+Line 63 ERROR: Undefined symbol
+0000007C  0CB9 004DBD16 005455B8    63      cmp.l   #POWERUP_MAX_MOVE_SPEED_LEVEL, PowerUpMoveSpeedLevel
+00000086  6C00 001A                 64      bge     skipIncreaseMoveSpdLevel
+0000008A                            65      
+Line 66 ERROR: Undefined symbol
+0000008A  52B9 005455B8             66      add.l   #1, PowerUpMoveSpeedLevel
+00000090  4EB9 0000016C             67      jsr     updatePowerUpValues
+00000096                            68      
+Line 69 ERROR: Symbol value differs between first and second pass
+00000096                            69  skipIncreaseMoveSpdLevel:
+Line 70 ERROR: Undefined symbol
+00000096                            70      movem.l (sp), ALL_REG
+Line 71 ERROR: Invalid syntax
+00000096                            71      add.l   #LONG_OFFSET*15, sp
+00000096  4E75                      72      rts
+00000098                            73      
+Line 74 ERROR: Symbol value differs between first and second pass
+00000098                            74  increasePowerUpAtkSpeedLevel:
+00000098                            75  * Increase the attack speed power-up level by 1, doesn't do anything if is at max
+Line 76 ERROR: Invalid syntax
+00000098                            76      sub.l   #LONG_OFFSET*15, sp
+Line 77 ERROR: Undefined symbol
+00000098                            77      movem.l ALL_REG, (sp)
+00000098                            78  
+Line 79 ERROR: Undefined symbol
+00000098  0CB9 004DBD16 005455B8    79      cmp.l   #POWERUP_MAX_ATK_SPEED_LEVEL, PowerUpAtkSpeedLevel
+000000A2  6C00 0026                 80      bge     skipIncreaseAtkSpdLevel
+000000A6                            81      
+Line 82 ERROR: Undefined symbol
+000000A6  52B9 005455B8             82      add.l   #1, PowerUpAtkSpeedLevel
+000000AC  4EB9 0000016C             83      jsr     updatePowerUpValues
+000000B2                            84      
+Line 85 ERROR: Symbol value differs between first and second pass
+000000B2                            85  skipIncreaseAtkSpdLevel:
+Line 86 ERROR: Undefined symbol
+000000B2                            86      movem.l (sp), ALL_REG
+Line 87 ERROR: Invalid syntax
+000000B2                            87      add.l   #LONG_OFFSET*15, sp
+000000B2  4E75                      88      rts 
+000000B4                            89      
+Line 90 ERROR: Symbol value differs between first and second pass
+000000B4                            90  increasePowerUpFuel:
+000000B4                            91  * Increase fuel by collecting the power-up
+000000B4                            92  * Doesn't increase more than max
+Line 93 ERROR: Undefined symbol
+000000B4  06B9 004DBD16 005455B8    93      add.l   #POWERUP_FUEL_AMOUNT, CurrentFuel
+Line 94 ERROR: Undefined symbol
+000000BE  0CB9 004DBD16 005455B8    94      cmp.l   #MAX_FUEL, CurrentFuel
+000000C8  6F00 002A                 95      ble     skipAdjustFuelToMax
+000000CC                            96      
+000000CC                            97  * Adjust fuel back to max
+Line 98 ERROR: Undefined symbol
+000000CC  23FC 004DBD16 005455B8    98      move.l  #MAX_FUEL, CurrentFuel
+000000D6                            99  
+Line 100 ERROR: Symbol value differs between first and second pass
+000000D6                           100  skipAdjustFuelToMax:
+000000D6  4E75                     101      rts
+000000D8                           102  
+Line 103 ERROR: Symbol value differs between first and second pass
+000000D8                           103  increasePowerUpSpreadLevel:
+000000D8                           104  * Increase the spread power-up level by 1, doesn't do anything if is at max
+Line 105 ERROR: Invalid syntax
+000000D8                           105      sub.l   #LONG_OFFSET*15, sp
+Line 106 ERROR: Undefined symbol
+000000D8                           106      movem.l ALL_REG, (sp)
+000000D8                           107  
+Line 108 ERROR: Undefined symbol
+000000D8  0CB9 004DBD16 005455B8   108      cmp.l   #POWERUP_MAX_SPREAD_LEVEL, PowerUpSpreadLevel
+000000E2  6C00 002C                109      bge     skipIncreaseSpreadLevel
+000000E6                           110      
+Line 111 ERROR: Undefined symbol
+000000E6  52B9 005455B8            111      add.l   #1, PowerUpSpreadLevel
+000000EC                           112      
+Line 113 ERROR: Symbol value differs between first and second pass
+000000EC                           113  skipIncreaseSpreadLevel:
+Line 114 ERROR: Undefined symbol
+000000EC                           114      movem.l (sp), ALL_REG
+Line 115 ERROR: Invalid syntax
+000000EC                           115      add.l   #LONG_OFFSET*15, sp
+000000EC  4E75                     116      rts 
+000000EE                           117  
+Line 118 ERROR: Symbol value differs between first and second pass
+000000EE                           118  spawnPowerUpFloatingText:
+000000EE  4283                     119      clr.l   d3
+Line 120 ERROR: Undefined symbol
+000000F0  1639 004DBD16            120      move.b  PowerUpTypeToSpawn, d3
+000000F6  E58B                     121      lsl.l   #2, d3                                  
+000000F8                           122      
+000000F8                           123  * Set string
+Line 124 ERROR: Undefined symbol
+000000F8  45F9 004DBD16            124      lea     PowerUpStrings, a2
+000000FE  2272 3000                125      movea.l (a2, d3), a1
+00000102                           126  
+00000102                           127  * Set position
+00000102                           128  * Relies on the D1 earlier (power-up index)
+00000102                           129  * This is a bad design, consider improve if there's time
+00000102  E589                     130      lsl.l   #2, d1
+Line 131 ERROR: Undefined symbol
+00000104  45F9 004DBD16            131      lea     FPowerUpPosY, a2
+0000010A  2432 1000                132      move.l  (a2, d1), d2
+Line 133 ERROR: Undefined symbol
+0000010E  45F9 004DBD16            133      lea     FPowerUpPosX, a2
+00000114  2232 1000                134      move.l  (a2, d1), d1
+00000118                           135      
+00000118                           136  * Save context for this function and spawnFloatingText
+00000118                           137  * Needs D1=LeftX, D2=UpperY
+Line 138 ERROR: Invalid syntax
+00000118                           138      sub.l   #LONG_OFFSET*8, sp
+00000118  48D7 0E1F                139      movem.l d0-d4/a1-a3, (sp)
+0000011C                           140      
+0000011C                           141  * Spawn it
+Line 142 ERROR: Undefined symbol
+0000011C  203C 004DBD16            142      move.l  #FLOATING_TEXT_POWERUP_TTL, d0
+Line 143 ERROR: Undefined symbol
+00000122  4EB9 004DBD16            143      jsr     spawnFloatingText          
+00000128                           144      
+00000128                           145  * Load context
+00000128  4CD7 0E1F                146      movem.l (sp), d0-d4/a1-a3
+Line 147 ERROR: Invalid syntax
+0000012C                           147      add.l   #LONG_OFFSET*8, sp
+0000012C  4E75                     148      rts
+0000012E                           149      
+Line 150 ERROR: Symbol value differs between first and second pass
+0000012E                           150  powerUpUpdate:
+0000012E                           151  * Update values anything power-up related for each frame
+0000012E                           152  * Not to be confused with updatePowerUpValues
+0000012E  4EB9 00000202            153      jsr     updatePowerUpPositions
+00000134  4E75                     154      rts
+00000136                           155      
+Line 156 ERROR: Symbol value differs between first and second pass
+00000136                           156  updatePowerUpValues:
+00000136                           157  * Get the power-up levels in the heap and apply the respective value to other memories in the heap
+00000136                           158  
+00000136                           159  * Registers used: D0, A1
+00000136                           160  
+00000136                           161  * Movement speed
+Line 162 ERROR: Undefined symbol
+00000136  2039 004DBD16            162      move.l  PowerUpMoveSpeedLevel, d0
+Line 163 ERROR: Undefined symbol
+0000013C  43F9 004DBD16            163      lea     FPowerUpMoveSpeedValues, a1
+00000142  E588                     164      lsl.l   #2, d0                          ; Long offset
+Line 165 ERROR: Undefined symbol
+00000144  23F1 0000 005455B8       165      move.l  (a1, d0), FPlayerSpeed
+0000014C                           166  
+0000014C                           167  * Attack speed
+Line 168 ERROR: Undefined symbol
+0000014C  2039 004DBD16            168      move.l  PowerUpAtkSpeedLevel, d0
+Line 169 ERROR: Undefined symbol
+00000152  43F9 004DBD16            169      lea     PowerUpAtkCdValues, a1
+00000158  E588                     170      lsl.l   #2, d0                          ; Long offset
+Line 171 ERROR: Undefined symbol
+0000015A  23F1 0000 005455B8       171      move.l  (a1, d0), PlayerAttackCooldown
+00000162                           172      
+00000162  4E75                     173      rts
+00000164                           174  
+Line 175 ERROR: Symbol value differs between first and second pass
+00000164                           175  attemptToSpawnPowerUp:
+00000164                           176  * Roll a random chance whether to spawn a power-up
+00000164                           177  * Then loop through the IsPowerUpActive array and check whether if there's an inactive power-up slot
+00000164                           178  * If there is, then spawn it at the dead enemy's location
+00000164                           179  
+00000164                           180  * Parameters:
+00000164                           181  * FLastEnemyDeadX, FLastEnemyDeadY: Position of the last enemy dead which should be set when the enemy dies
+00000164                           182  
+00000164                           183  * Registers used: D0-D2, D6-D7 (Random), A1-A2, A3 (Random)
+00000164                           184  
+00000164                           185  * TODO: Roll a random chance here
+00000164                           186      
+00000164                           187  * Loop trying to find an inactive power-up slot
+Line 188 ERROR: Undefined symbol
+00000164  43F9 004DBD16            188      lea     IsPowerUpActive, a1
+Line 189 ERROR: Comma expected
+0000016A                           189      move.l  #MAX_POWERUPS_ON_SCREEN-1, d0
+0000016A                           190      
+Line 191 ERROR: Symbol value differs between first and second pass
+0000016A                           191  spawnPowerUpLoop:
+Line 192 ERROR: Undefined symbol
+0000016A  0C19 0016                192      cmp.b   #POWERUP_STATUS_INACTIVE, (a1)+
+0000016E  6700 0044                193      beq     spawnPowerUp
+00000172                           194      
+Line 195 ERROR: Symbol value differs between first and second pass
+00000172                           195  continueSpawnPowerUpLoop:
+00000172  51C8 0032                196      dbra    d0, spawnPowerUpLoop
+00000176                           197  
+00000176                           198  * No power-up slot, just return
+00000176  4E75                     199      rts
+00000178                           200      
+Line 201 ERROR: Symbol value differs between first and second pass
+00000178                           201  spawnPowerUp:
+00000178  2200                     202      move.l  d0, d1
+Line 203 ERROR: Comma expected
+0000017A                           203      sub.l   #MAX_POWERUPS_ON_SCREEN-1, d1
+0000017A  4481                     204      neg.l   d1                              ; D1 contains true power-up index
+0000017C                           205      
+0000017C                           206  * Set active
+Line 207 ERROR: Undefined symbol
+0000017C  137C 0016 FFFF           207      move.b  #POWERUP_STATUS_ACTIVE, -1(a1)
+00000182                           208      
+00000182                           209  * Set the power-up's type
+Line 210 ERROR: Undefined symbol
+00000182  45F9 004DBD16            210      lea     PowerUpType, a2
+Line 211 ERROR: Undefined symbol
+00000188  15B9 004DBD16 1000       211      move.b  PowerUpTypeToSpawn, (a2, d1)
+00000190                           212  
+00000190  E589                     213      lsl.l   #2, d1                          ; D1 contains power-up index long offset 
+00000192                           214  
+00000192                           215  * Set the power-up's position
+Line 216 ERROR: Undefined symbol
+00000192  45F9 004DBD16            216      lea     FPowerUpPosX, a2
+Line 217 ERROR: Undefined symbol
+00000198  2439 004DBD16            217      move.l  FLastEnemyDeadX, d2
+Line 218 ERROR: Invalid syntax
+0000019E                           218      sub.l   #ENEMY_SIZE_X<<FRACTIONAL_BITS, d2
+0000019E  2582 1000                219      move.l  d2, (a2, d1)
+000001A2                           220      
+Line 221 ERROR: Undefined symbol
+000001A2  45F9 004DBD16            221      lea     FPowerUpPosY, a2
+Line 222 ERROR: Undefined symbol
+000001A8  2439 004DBD16            222      move.l  FLastEnemyDeadY, d2
+Line 223 ERROR: Invalid syntax
+000001AE                           223      sub.l   #ENEMY_SIZE_Y<<FRACTIONAL_BITS, d2
+000001AE  2582 1000                224      move.l  d2, (a2, d1)
+000001B2                           225      
+000001B2  4E75                     226      rts
+000001B4                           227      
+Line 228 ERROR: Symbol value differs between first and second pass
+000001B4                           228  updatePowerUpPositions:
+000001B4                           229  * Loop through the IsPowerUpActive array and find active ones
+000001B4                           230  * Then move them down, and check if they're offscreen
+000001B4                           231  
+000001B4                           232  * Registers used: D0-D2, A1-A2
+Line 233 ERROR: Undefined symbol
+000001B4  43F9 004DBD16            233      lea     IsPowerUpActive, a1
+Line 234 ERROR: Comma expected
+000001BA                           234      move.l  #MAX_POWERUPS_ON_SCREEN-1, d0
+000001BA                           235  
+Line 236 ERROR: Symbol value differs between first and second pass
+000001BA                           236  updatePowerUpPositionsLoop:
+Line 237 ERROR: Undefined symbol
+000001BA  0C19 0016                237      cmp.b   #POWERUP_STATUS_ACTIVE, (a1)+
+000001BE  6600 008E                238      bne     continuePowerUpPositionLoop
+000001C2                           239      
+000001C2                           240  * Move the power-up here
+000001C2  2200                     241      move.l  d0, d1
+Line 242 ERROR: Comma expected
+000001C4                           242      sub.l   #MAX_POWERUPS_ON_SCREEN-1, d1
+000001C4  4481                     243      neg.l   d1
+000001C6  E589                     244      lsl.l   #2, d1                          ; D1 contains power-up index long offset
+000001C8                           245      
+Line 246 ERROR: Invalid syntax
+000001C8                           246      move.l  #FPOWERUP_MOVEMENT_SPEED>>HALF_FRACTIONAL_BITS, d3
+Line 247 ERROR: Undefined symbol
+000001C8  2439 004DBD16            247      move.l  DeltaTime, d2
+Line 248 ERROR: Undefined symbol
+000001CE  ED8A                     248      lsl.l   #HALF_FRACTIONAL_BITS, d2       ; Preshift
+000001D0  C7C2                     249      muls.w  d2, d3
+000001D2                           250      
+Line 251 ERROR: Undefined symbol
+000001D2  45F9 004DBD16            251      lea     FPowerUpPosY, a2
+000001D8  D7B2 1000                252      add.l   d3, (a2, d1)                    ; Move down
+000001DC                           253      
+000001DC                           254  * Check offscreen
+Line 255 ERROR: Undefined symbol
+000001DC  0CB2 004DBD16 1000       255      cmp.l   #FPOWERUP_OFFSCREEN_Y, (a2, d1)
+000001E4  6F00 0068                256      ble     continuePowerUpPositionLoop
+000001E8                           257  
+000001E8                           258  * Kill the power-up here
+Line 259 ERROR: Undefined symbol
+000001E8  137C 0016 FFFF           259      move.b  #POWERUP_STATUS_INACTIVE, -1(a1)
+000001EE                           260      
+Line 261 ERROR: Symbol value differs between first and second pass
+000001EE                           261  continuePowerUpPositionLoop:
+000001EE  51C8 001E                262      dbra    d0, updatePowerUpPositionsLoop
+000001F2                           263  
+000001F2                           264  * No more power-up, return
+000001F2  4E75                     265      rts
+000001F4                           266  
+000001F4                           267  
+000001F4                           268  
+000001F4                           269  
+000001F4                           270  
+000001F4                           271  
+000001F4                           272  
+Line 273 WARNING: END directive missing, starting address not set
+
+87 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ATTEMPTTOSPAWNPOWERUP  19A
+CONTINUEPOWERUPPOSITIONLOOP  24E
+CONTINUESPAWNPOWERUPLOOP  1AE
+INCREASEPOWERUPATKSPEEDLEVEL  AA
+INCREASEPOWERUPFUEL  D2
+INCREASEPOWERUPMOVESPEEDLEVEL  82
+INCREASEPOWERUPSPREADLEVEL  F6
+INITIALIZEISPOWERUPACTIVE  34
+INITIALIZEPOWERUPLEVELS  E
+INITIALIZEPOWERUPSYSTEM  0
+INITISPOWERUPACTIVELOOP  40
+ONPOWERUPATKSPEEDCOLLECTED  58
+ONPOWERUPFUELCOLLECTED  66
+ONPOWERUPMOVESPEEDCOLLECTED  4A
+ONPOWERUPSPREADCOLLECTED  74
+POWERUPUPDATE       164
+SKIPADJUSTFUELTOMAX  F4
+SKIPINCREASEATKSPDLEVEL  CA
+SKIPINCREASEMOVESPDLEVEL  A2
+SKIPINCREASESPREADLEVEL  110
+SPAWNPOWERUP        1B4
+SPAWNPOWERUPFLOATINGTEXT  118
+SPAWNPOWERUPLOOP    1A6
+UPDATEPOWERUPPOSITIONS  202
+UPDATEPOWERUPPOSITIONSLOOP  20E
+UPDATEPOWERUPVALUES  16C

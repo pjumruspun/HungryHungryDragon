@@ -1,0 +1,126 @@
+00003000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/4/2024 4:45:57 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Score
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/4/2024
+00000000                             5  * Description: Display score in the game. 
+00000000                             6  *              Also includes functions to convert hex to decimal.
+00000000                             7  *-----------------------------------------------------------
+00000000                             8  
+00000000  =0000000A                  9  BASE_TEN_DIVIDER        equ 10
+00000000  =0000000F                 10  SCORE_MASK              equ $F  ; Used for masking each digit
+00000000                            11  
+00000000                            12  resetScore:
+Line 13 ERROR: Undefined symbol
+00000000  23FC 004DBD16 005455B8    13      move.l  #INITIAL_SCORE_VALUE, PlayerScore
+0000000A  4EB9 00000012             14      jsr     drawScore
+00000010  4E75                      15      rts
+00000012                            16      
+00000012                            17  drawScore:
+00000012                            18  * Draw the score equals to PlayerScore on the respective location set in the constants
+00000012                            19  * Registers used: D0-D7, A1
+Line 20 ERROR: Undefined symbol
+00000012  243C 004DBD16             20      move.l  #SCORE_POSITION_X, d2
+Line 21 ERROR: Undefined symbol
+00000018  263C 004DBD16             21      move.l  #SCORE_POSITION_Y, d3
+Line 22 ERROR: Undefined symbol
+0000001E  2039 004DBD16             22      move.l  PlayerScore, d0
+00000024                            23      
+00000024  B0BC 00000000             24      cmp.l   #0, d0 
+0000002A  6700 0042                 25      beq     drawZeroScore
+0000002E                            26      
+0000002E  4EB9 00000078             27      jsr     hexToDecimal
+00000034  2807                      28      move.l  d7, d4
+00000036                            29      
+00000036                            30  drawScoreLoop:
+00000036  2204                      31      move.l  d4, d1
+00000038                            32      
+00000038  C2BC 0000000F             33      and.l   #SCORE_MASK, d1     ; Single digit in D5
+0000003E  B8BC 00000000             34      cmp.l   #0, d4              ; Run of out digits if the score is 0
+00000044  6700 0026                 35      beq     stopDrawingScore
+00000048                            36      
+00000048                            37  * Draw each seven segment here
+Line 38 ERROR: Invalid syntax
+00000048                            38      sub.l   #LONG_OFFSET*4, sp  
+00000048  48D7 001E                 39      movem.l d1-d4, (sp)         ; Save context
+0000004C                            40      
+Line 41 ERROR: Undefined symbol
+0000004C  4EB9 004DBD16             41      jsr     drawSevenSegment
+00000052                            42      
+00000052  4CD7 001E                 43      movem.l (sp), d1-d4
+Line 44 ERROR: Invalid syntax
+00000056                            44      add.l   #LONG_OFFSET*4, sp          ; Load context
+00000056                            45  
+00000056  E88C                      46      lsr.l   #4, d4                      ; Shift by 1 hex digit
+Line 47 ERROR: Undefined symbol
+00000058  0482 004DBD16             47      sub.l   #SCORE_DIGIT_SPACE_X ,d2    ; Move the drawing origin to the left
+0000005E                            48      
+0000005E  60D6                      49      bra     drawScoreLoop
+00000060                            50      
+Line 51 ERROR: Symbol value differs between first and second pass
+00000060                            51  stopDrawingScore:
+00000060  4E75                      52      rts 
+00000062                            53      
+Line 54 ERROR: Symbol value differs between first and second pass
+00000062                            54  drawZeroScore:
+00000062                            55  * Special case where we draw a single digit of 0
+00000062                            56  * The general subroutine cannot handle this since it checks whether the score is 0 or not
+00000062                            57  * And if it is, it stops drawing
+00000062  2200                      58      move.l  d0, d1
+Line 59 ERROR: Undefined symbol
+00000064  4EB9 004DBD16             59      jsr     drawSevenSegment
+0000006A                            60      
+0000006A  4E75                      61      rts
+0000006C                            62  
+Line 63 ERROR: Symbol value differs between first and second pass
+0000006C                            63  hexToDecimal:
+0000006C                            64  * Converts hex to decimal e.g. 0xFFFF will turn into 65535
+0000006C                            65  * Parameters:
+0000006C                            66  * D0: Unsigned hexadecimal number (Up to 0xFFFF times 10 due to DIVU limitations)
+0000006C                            67  
+0000006C                            68  * Returns:
+0000006C                            69  * D7: Unsigned decimal number
+0000006C                            70  
+0000006C                            71  * Other registers used: D1
+0000006C                            72  
+0000006C  4287                      73      clr.l   d7
+0000006E  123C 00FC                 74      move.b  #-4, d1                  ; D1 is the rotate counter
+00000072                            75      
+Line 76 ERROR: Symbol value differs between first and second pass
+00000072                            76  hexToDecimalLoop:
+00000072  E89F                      77      ror.l   #4, d7                  ; Rotate the digit
+00000074  5801                      78      add.b   #4, d1
+00000076                            79      
+00000076  80FC 000A                 80      divu    #BASE_TEN_DIVIDER, d0
+0000007A  4840                      81      swap    d0
+0000007C  DE00                      82      add.b   d0, d7                  ; Move the remainder
+0000007E                            83      
+0000007E  303C 0000                 84      move.w  #0, d0                  ; Clear the remainder
+00000082  4840                      85      swap    d0                      ; Swap the quotient back to divide in the next iteration
+00000084                            86      
+00000084  66F8                      87      bne     hexToDecimalLoop
+00000086                            88  
+00000086  E3BF                      89      rol.l   d1, d7                  ; Rotate back
+00000088                            90      
+00000088  4E75                      91      rts
+Line 92 WARNING: END directive missing, starting address not set
+
+13 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BASE_TEN_DIVIDER    A
+DRAWSCORE           12
+DRAWSCORELOOP       36
+DRAWZEROSCORE       6E
+HEXTODECIMAL        78
+HEXTODECIMALLOOP    7E
+RESETSCORE          0
+SCORE_MASK          F
+STOPDRAWINGSCORE    6C

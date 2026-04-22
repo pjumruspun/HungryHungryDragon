@@ -1,0 +1,327 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/7/2024 2:46:40 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Collision
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/3/2024
+00000000                             5  * Description: Collision Detection Subroutines
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  enemyCollisionUpdate:
+00000000                             9  * Collision between enemy and player's projectiles
+00000000                            10  * Will have to compare every pair of enemy and projectile's positions
+00000000                            11  * This will be O(ProjectileCount * EnemyCount) and will be called each frame
+00000000                            12  
+00000000                            13  * Registers used: D0-D2, D3 (in drawScore), D4-D7, A1-A3 (A3 being used in get position)
+00000000                            14  
+00000000                            15  * First, loop through the enemy and get their positions
+Line 16 ERROR: Comma expected
+00000000                            16      move.l  #MAX_ENEMY_ALLOWED-1, d0
+Line 17 ERROR: Comma expected
+00000000                            17      move.l  #MAX_PLAYER_PROJECTILE-1, d1
+00000000                            18      
+Line 19 ERROR: Undefined symbol
+00000000  43F9 004DBD16             19      lea     IsEnemyAlive, a1
+Line 20 ERROR: Undefined symbol
+00000006  45F9 004DBD16             20      lea     IsProjectileActive, a2
+0000000C                            21      
+Line 22 ERROR: Symbol value differs between first and second pass
+0000000C                            22  enemyCollisionLoop:
+Line 23 ERROR: Undefined symbol
+0000000C  0C19 0016                 23      cmp.b   #ENEMY_STATUS_ALIVE, (a1)+
+00000010  6600 00CC                 24      bne     continueEnemyCollisionLoop              ; If not alive, just continue to the next enemy
+00000014                            25      
+Line 26 ERROR: Undefined symbol
+00000014  45F9 004DBD16             26      lea     IsProjectileActive, a2
+Line 27 ERROR: Comma expected
+0000001A                            27      move.l  #MAX_PLAYER_PROJECTILE-1, d1
+0000001A                            28      
+Line 29 ERROR: Symbol value differs between first and second pass
+0000001A                            29  playerProjectileCollisionLoop:
+Line 30 ERROR: Undefined symbol
+0000001A  0C1A 0016                 30      cmp.b   #PLAYER_PROJ_STATUS_ACTIVE, (a2)+
+0000001E  6600 00BA                 31      bne     continuePlayerProjCollisionLoop         ; If projectile not active, continue
+00000022                            32      
+00000022                            33  * By this point, enemy at a1 should be alive and the projectile should also be active
+00000022  2400                      34      move.l  d0, d2
+Line 35 ERROR: Comma expected
+00000024                            35      sub.l   #MAX_ENEMY_ALLOWED-1, d2                
+00000024  4482                      36      neg.l   d2                                      ; D2 should contain enemy's index
+00000026                            37      
+Line 38 ERROR: Undefined symbol
+00000026  4EB9 004DBD16             38      jsr     getEnemyPosition                        ; D6, D7 should contain enemy's position
+0000002C                            39      
+0000002C  2401                      40      move.l  d1, d2
+Line 41 ERROR: Comma expected
+0000002E                            41      sub.l   #MAX_PLAYER_PROJECTILE-1, d2            
+0000002E  4482                      42      neg.l   d2                                      ; D2 should contain projectile index
+00000030                            43      
+Line 44 ERROR: Undefined symbol
+00000030  4EB9 004DBD16             44      jsr     getProjectilePosition                   ; D4, D5 should contain projectile's position
+00000036                            45      
+00000036                            46  * Compare enemy's hitbox and player's projectile here
+00000036                            47  * To properly collide we need all conditions to be true:
+00000036                            48  * (1) ProjectileY (D5)  >=  EnemyY (D7)
+00000036                            49  * (2) ProjectileY (D5)  <=  EmemyY (D7) + EnemySizeY
+00000036                            50  * (3) ProjectileX (D4)  >=  EnemyX (D6) - ProjectileSizeX
+00000036                            51  * (4) ProjectileX (D4)  <=  EnemyX (D6) + EnemySizeX
+00000036                            52  
+00000036                            53  * Check (1)
+00000036  BA87                      54      cmp.l   d7, d5
+00000038  6D00 00A0                 55      blt     continuePlayerProjCollisionLoop
+0000003C                            56  * Check (2)
+Line 57 ERROR: Invalid syntax
+0000003C                            57      add.l   #ENEMY_SIZE_Y<<FRACTIONAL_BITS, d7
+0000003C  BA87                      58      cmp.l   d7, d5
+0000003E  6E00 009A                 59      bgt     continuePlayerProjCollisionLoop
+00000042                            60  * Check (3)
+Line 61 ERROR: Invalid syntax
+00000042                            61      sub.l   #PLAYER_PROJECTILE_SIZE_X<<FRACTIONAL_BITS, d6
+00000042  B886                      62      cmp.l   d6, d4
+00000044  6D00 0094                 63      blt     continuePlayerProjCollisionLoop
+00000048                            64  * Check (4)
+Line 65 ERROR: Invalid syntax
+00000048                            65      add.l   #PLAYER_PROJECTILE_SIZE_X<<FRACTIONAL_BITS, d6  ; Add back from check (3)
+Line 66 ERROR: Invalid syntax
+00000048                            66      add.l   #ENEMY_SIZE_X<<FRACTIONAL_BITS, d6
+00000048  B886                      67      cmp.l   d6, d4
+0000004A  6E00 008E                 68      bgt     continuePlayerProjCollisionLoop
+0000004E                            69      
+0000004E                            70  * All checks passed if we reach here, which mean we need to handle the collision
+0000004E                            71  * Expected behavior would be to destroy both the enemy and the projectile
+0000004E                            72      
+Line 73 ERROR: Undefined symbol
+0000004E  137C 0016 FFFF            73      move.b  #ENEMY_STATUS_DEAD, -1(a1)                  ; Since we post incremental we need to offset back
+Line 74 ERROR: Undefined symbol
+00000054  157C 0016 FFFF            74      move.b  #PLAYER_PROJ_STATUS_INACTIVE, -1(a2)
+0000005A                            75      
+0000005A                            76  * Update the score here
+Line 77 ERROR: Undefined symbol
+0000005A  06B9 004DBD16 005455B8    77      add.l   #SCORE_EACH_KILL, PlayerScore
+00000064                            78  
+00000064                            79  * D0-D7, A1 is being used in drawScore subroutine
+00000064                            80  * A2 might be excessive and not needed to be saved
+Line 81 ERROR: Invalid syntax
+00000064                            81      sub.l   #LONG_OFFSET*10, sp
+00000064  48D7 06FF                 82      movem.l d0-d7/a1-a2, (sp)                           ; Save context
+00000068                            83      
+Line 84 ERROR: Undefined symbol
+00000068  4EB9 004DBD16             84      jsr     drawScore                                   
+0000006E                            85      
+0000006E  4CD7 06FF                 86      movem.l (sp), d0-d7/a1-a2
+Line 87 ERROR: Invalid syntax
+00000072                            87      add.l   #LONG_OFFSET*10, sp                         ; Load context
+00000072                            88      
+00000072                            89  * Spawning powerup uses D0-D1, D6-D7, A1-A3, but we'll save all data register for easy-to-read code
+Line 90 ERROR: Invalid syntax
+00000072                            90      sub.l   #LONG_OFFSET*11, sp
+00000072  48D7 0EFF                 91      movem.l d0-d7/a1-a3, (sp)
+00000076                            92  
+00000076                            93  * Passing parameters in heap
+Line 94 ERROR: Undefined symbol
+00000076  23C6 005455CC             94      move.l  d6, FLastEnemyDeadX                         ; From getEnemyPosition jsr above
+Line 95 ERROR: Undefined symbol
+0000007C  23C7 005455B8             95      move.l  d7, FLastEnemyDeadY
+00000082                            96      
+Line 97 ERROR: Undefined symbol
+00000082  4EB9 004DBD16             97      jsr     attemptToSpawnPowerUp
+00000088                            98      
+00000088  48D7 0EFF                 99      movem.l d0-d7/a1-a3, (sp)
+Line 100 ERROR: Invalid syntax
+0000008C                           100      add.l   #LONG_OFFSET*11, sp
+0000008C                           101  
+Line 102 ERROR: Symbol value differs between first and second pass
+0000008C                           102  continuePlayerProjCollisionLoop:
+0000008C  51C9 FF9E                103      dbra    d1, playerProjectileCollisionLoop
+00000090                           104      
+Line 105 ERROR: Symbol value differs between first and second pass
+00000090                           105  continueEnemyCollisionLoop:
+00000090  51C8 FF86                106      dbra    d0, enemyCollisionLoop
+00000094                           107      
+00000094  4E75                     108      rts
+00000096                           109  
+Line 110 ERROR: Symbol value differs between first and second pass
+00000096                           110  playerCollisionUpdate:
+00000096                           111  * Collision between player and enemy's projectiles
+00000096                           112  * This will be O(EnemyProjectileCount) and will be called each frame
+00000096                           113      
+00000096                           114  * Registers used: D0-D3, A1-A2
+00000096                           115  
+Line 116 ERROR: Comma expected
+00000096                           116      move.l  #MAX_ENEMY_PROJECTILE-1, d0
+Line 117 ERROR: Undefined symbol
+00000096  43F9 004DBD16            117      lea     IsEnemyProjectileActive, a1
+0000009C                           118  
+Line 119 ERROR: Symbol value differs between first and second pass
+0000009C                           119  enemyProjCollisionLoop:
+Line 120 ERROR: Undefined symbol
+0000009C  0C19 0016                120      cmp.b   #ENEMY_PROJ_STATUS_ACTIVE, (a1)+
+000000A0  6600 00AA                121      bne     continueEnemyProjCollisionLoop
+000000A4                           122      
+000000A4                           123  * The projectile is active, check positions
+000000A4                           124  * Collision happens if
+000000A4                           125  * (1) ProjectileX >= PlayerX
+000000A4                           126  * (2) ProjectileX <= PlayerX + PlayerSizeX
+000000A4                           127  * (3) ProjectileY >= PlayerY
+000000A4                           128  * (4) ProjectileY <= PlayerY + PlayerSizeY
+000000A4                           129  
+000000A4  2200                     130      move.l  d0, d1
+Line 131 ERROR: Comma expected
+000000A6                           131      sub.l   #MAX_ENEMY_PROJECTILE-1, d1
+000000A6  4481                     132      neg.l   d1                                          ; D1 has true projectile index
+000000A8  E589                     133      lsl.l   #2, d1                                      ; Long offset
+000000AA                           134      
+Line 135 ERROR: Undefined symbol
+000000AA  45F9 004DBD16            135      lea     FEnemyProjectileX, a2
+000000B0  2432 1000                136      move.l  (a2, d1), d2                                ; FProjectileX
+Line 137 ERROR: Undefined symbol
+000000B4  2639 004DBD16            137      move.l  FPlayerX, d3
+000000BA                           138      
+000000BA                           139  * Check (1)
+000000BA  B483                     140      cmp.l   d3, d2
+000000BC  6D00 008E                141      blt     continueEnemyProjCollisionLoop
+000000C0                           142      
+000000C0                           143  * Check (2)
+Line 144 ERROR: Invalid syntax
+000000C0                           144      add.l   #PLAYER_SIZE_X<<FRACTIONAL_BITS, d3
+000000C0  B483                     145      cmp.l   d3, d2
+000000C2  6E00 0088                146      bgt     continueEnemyProjCollisionLoop
+000000C6                           147      
+Line 148 ERROR: Undefined symbol
+000000C6  45F9 004DBD16            148      lea     FEnemyProjectileY, a2
+000000CC  2432 1000                149      move.l  (a2, d1), d2                                ; FProjectileY
+Line 150 ERROR: Undefined symbol
+000000D0  2639 004DBD16            150      move.l  FPlayerY, d3
+000000D6                           151      
+000000D6                           152  * Check (3)
+000000D6  B483                     153      cmp.l   d3, d2
+000000D8  6D00 0072                154      blt     continueEnemyProjCollisionLoop
+000000DC                           155      
+000000DC                           156  * Check (4)
+Line 157 ERROR: Invalid syntax
+000000DC                           157      add.l   #PLAYER_SIZE_Y<<FRACTIONAL_BITS, d3
+000000DC  B483                     158      cmp.l   d3, d2
+000000DE  6E00 006C                159      bgt     continueEnemyProjCollisionLoop
+000000E2                           160      
+000000E2                           161  * Passed all checks, collision happens here
+000000E2                           162  * Gameover and restart for now
+Line 163 ERROR: Undefined symbol
+000000E2  6000 BC32                163      bra     gameOver
+000000E6                           164      
+Line 165 ERROR: Symbol value differs between first and second pass
+000000E6                           165  continueEnemyProjCollisionLoop
+000000E6  51C8 0008                166      dbra    d0, enemyProjCollisionLoop
+000000EA                           167  
+000000EA  4E75                     168      rts
+000000EC                           169  
+Line 170 ERROR: Symbol value differs between first and second pass
+000000EC                           170  powerUpCollisionUpdate:
+000000EC                           171  * Loop through the powerUp array, find an active one
+000000EC                           172  * And see if the player and power-up's position overlaps
+000000EC                           173  * Registers used: D0, A1-A2
+Line 174 ERROR: Undefined symbol
+000000EC  203C 004DBD16            174      move.l  #MAX_POWERUPS_ON_SCREEN, d0
+Line 175 ERROR: Undefined symbol
+000000F2  43F9 004DBD16            175      lea     IsPowerUpActive, a1
+000000F8                           176  
+Line 177 ERROR: Symbol value differs between first and second pass
+000000F8                           177  powerUpCollisionLoop:
+Line 178 ERROR: Undefined symbol
+000000F8  0C19 0016                178      cmp.b   #POWERUP_STATUS_ACTIVE, (a1)+
+000000FC  6600 00D0                179      bne     continuePowerUpCollisionLoop
+00000100                           180      
+00000100                           181  * Check if the power-up collides with the player
+00000100                           182  * Collision happens if
+00000100                           183  * (1) PlayerX (D4) >= PowerUpX (D2) - PlayerSizeX
+00000100                           184  * (2) PlayerX (D4) <= PowerUpX (D2) + PowerUpSize
+00000100                           185  * (3) PlayerY (D5) >= PowerUpY (D3) - PlayerSizeY
+00000100                           186  * (4) PlayerY (D5) <= PowerUpY (D3) + PowerUpSize
+00000100                           187  
+00000100                           188  * First, get the long-offset index
+00000100  2200                     189      move.l  d0, d1
+Line 190 ERROR: Comma expected
+00000102                           190      sub.l   #MAX_POWERUPS_ON_SCREEN-1, d1
+00000102  4481                     191      neg.l   d1
+00000104  E589                     192      lsl.l   #2, d1
+00000106                           193      
+00000106                           194  * Get the power-up's position
+Line 195 ERROR: Undefined symbol
+00000106  45F9 004DBD16            195      lea     FPowerUpPosX, a2
+0000010C  2432 1000                196      move.l  (a2, d1), d2
+00000110                           197      
+Line 198 ERROR: Undefined symbol
+00000110  45F9 004DBD16            198      lea     FPowerUpPosY, a2
+00000116  2632 1000                199      move.l  (a2, d1), d3
+0000011A                           200      
+0000011A                           201  * Get the player positions
+Line 202 ERROR: Undefined symbol
+0000011A  2839 004DBD16            202      move.l  FPlayerX, d4
+Line 203 ERROR: Undefined symbol
+00000120  2A39 004DBD16            203      move.l  FPlayerY, d5
+00000126                           204  
+00000126                           205  * Check (1)
+Line 206 ERROR: Invalid syntax
+00000126                           206      sub.l   #PLAYER_SIZE_X<<FRACTIONAL_BITS, d2
+00000126  B882                     207      cmp.l   d2, d4
+00000128  6D00 00A4                208      blt     continuePowerUpCollisionLoop
+0000012C                           209      
+0000012C                           210  * Check (2)
+Line 211 ERROR: Invalid syntax
+0000012C                           211      add.l   #PLAYER_SIZE_X<<FRACTIONAL_BITS, d2     ; Add back from check (1)
+Line 212 ERROR: Invalid syntax
+0000012C                           212      add.l   #POWERUP_SIZE<<FRACTIONAL_BITS, d2
+0000012C  B882                     213      cmp.l   d2, d4
+0000012E  6E00 009E                214      bgt     continuePowerUpCollisionLoop
+00000132                           215      
+00000132                           216  * Check (3)
+Line 217 ERROR: Invalid syntax
+00000132                           217      sub.l   #PLAYER_SIZE_Y<<FRACTIONAL_BITS, d3
+00000132  BA83                     218      cmp.l   d3, d5
+00000134  6D00 0098                219      blt     continuePowerUpCollisionLoop
+00000138                           220      
+00000138                           221  * Check (4)  
+Line 222 ERROR: Invalid syntax
+00000138                           222      add.l   #PLAYER_SIZE_Y<<FRACTIONAL_BITS, d3     ; Add back from check (3)
+Line 223 ERROR: Invalid syntax
+00000138                           223      add.l   #POWERUP_SIZE<<FRACTIONAL_BITS, d3
+00000138  BA83                     224      cmp.l   d3, d5
+0000013A  6E00 0092                225      bgt     continuePowerUpCollisionLoop
+0000013E                           226      
+0000013E                           227  * All checks passed, collision happens here
+0000013E                           228      * move.b  #POWERUP_STATUS_INACTIVE, -1(a1)        ; Set inactive
+0000013E                           229     
+0000013E                           230  * Apply the corresponding beneficial effect here
+0000013E                           231  * TODO:
+0000013E                           232      
+Line 233 ERROR: Symbol value differs between first and second pass
+0000013E                           233  continuePowerUpCollisionLoop:
+0000013E  51C8 001E                234      dbra    d0, powerUpCollisionLoop
+00000142                           235  
+00000142                           236      
+00000142                           237  
+00000142                           238  
+00000142                           239  
+00000142                           240  
+00000142                           241  
+Line 242 WARNING: END directive missing, starting address not set
+
+62 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CONTINUEENEMYCOLLISIONLOOP  DE
+CONTINUEENEMYPROJCOLLISIONLOOP  14C
+CONTINUEPLAYERPROJCOLLISIONLOOP  DA
+CONTINUEPOWERUPCOLLISIONLOOP  1CE
+ENEMYCOLLISIONLOOP  18
+ENEMYCOLLISIONUPDATE  0
+ENEMYPROJCOLLISIONLOOP  F0
+PLAYERCOLLISIONUPDATE  E4
+PLAYERPROJECTILECOLLISIONLOOP  2C
+POWERUPCOLLISIONLOOP  15E
+POWERUPCOLLISIONUPDATE  152

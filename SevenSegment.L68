@@ -1,0 +1,179 @@
+00003000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/5/2024 10:27:51 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : 7-Segment Display
+00000000                             3  * Written by : Pon Jumruspun
+00000000                             4  * Date       : 6/4/2024
+00000000                             5  * Description: 7-Segment Display for displaying score.
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  drawSevenSegment:
+00000000                             9  * Draw a single 7-segment
+00000000                            10  * Parameters:
+00000000                            11  * D1: Number to display (Range of 0-9)
+00000000                            12  * D2, D3: OriginX and OriginY of the digit
+00000000                            13  
+00000000                            14  * Other registers used: D0, D4-D7, A1
+00000000                            15  
+00000000                            16  * Redraw the background lazily for now (draw once big rect for the whole 7-seg digit)
+Line 17 ERROR: Invalid syntax
+00000000                            17      sub.l   #LONG_OFFSET*3, sp
+00000000  48D7 000E                 18      movem.l d1-d3, (sp)             ; Save context
+00000004                            19  
+Line 20 ERROR: Undefined symbol
+00000004  43F9 004DBD16             20      lea     BackgroundImage, a1
+Line 21 ERROR: Undefined symbol
+0000000A  9FFC 004DBD16             21      sub.l   #SEVEN_ARGS_FUNC, sp
+00000010                            22      
+Line 23 ERROR: Undefined symbol
+00000010  2F49 55B8                 23      move.l  a1, BMP_ADDR(sp)
+00000014                            24      
+00000014  2002                      25      move.l  d2, d0
+Line 26 ERROR: Invalid syntax
+00000016                            26      sub.l   #SEVEN_SEGMENT_PEN_WIDTH>>1, d0
+Line 27 ERROR: Undefined symbol
+00000016  2F40 55D0                 27      move.l  d0, X_SCREEN(sp)        ; X_SCREEN = OriginX - PenWidth/2
+Line 28 ERROR: Undefined symbol
+0000001A  2F40 55C8                 28      move.l  d0, X_BMP(sp)           ; X_BMP = X_SCREEN
+0000001E                            29          
+0000001E  2003                      30      move.l  d3, d0
+Line 31 ERROR: Invalid syntax
+00000020                            31      sub.l   #SEVEN_SEGMENT_PEN_WIDTH>>1, d0
+00000020  5380                      32      sub.l   #1, d0
+Line 33 ERROR: Undefined symbol
+00000022  2F40 55D8                 33      move.l  d0, Y_SCREEN(sp)        ; Y_SCREEN = OriginY - PenWidth/2 - 1
+Line 34 ERROR: Comma expected
+00000026                            34      sub.l   #WINDOW_HEIGHT-BACKGROUND_HEIGHT-1, d0
+Line 35 ERROR: Undefined symbol
+00000026  2F40 55D0                 35      move.l  d0, Y_BMP(sp)           ; Y_BMP = Y_SCREEN - (ScreenHeight - BackgroundHeight -1)
+0000002A                            36      
+Line 37 ERROR: Invalid syntax
+0000002A                            37      move.l  #SEVEN_SEGMENT_LENGTH+SEVEN_SEGMENT_PEN_WIDTH, WIDTH_TO_DISPLAY(sp)    ; Length + PenWidth
+Line 38 ERROR: Invalid syntax
+0000002A                            38      move.l  #SEVEN_SEGMENT_LENGTH+SEVEN_SEGMENT_PEN_WIDTH+SEVEN_SEGMENT_WIDTH, HEIGHT_TO_DISPLAY(sp)   ; Length + 2 * PenWidth
+0000002A                            39      
+Line 40 ERROR: Undefined symbol
+0000002A  4EB9 004DBD16             40      jsr     displayBitmapChunk
+Line 41 ERROR: Undefined symbol
+00000030  DFFC 004DBD16             41      add.l   #SEVEN_ARGS_FUNC, sp    ; Fix stack
+00000036                            42      
+00000036  4CD7 000E                 43      movem.l (sp), d1-d3
+Line 44 ERROR: Invalid syntax
+0000003A                            44      add.l   #LONG_OFFSET*3, sp      ; Load context
+0000003A                            45      
+0000003A                            46  * Clear D4, D6, and D7 because we'll use them in less than long size
+0000003A  4284                      47      clr.l   d4
+0000003C  4286                      48      clr.l   d6
+0000003E  4287                      49      clr.l   d7
+00000040                            50  
+00000040                            51  * Load the table
+00000040                            52      
+Line 53 ERROR: Undefined symbol
+00000040  43F9 004DBD16             53      lea     SevenSegmentDigitCode, a1
+00000046  1831 1000                 54      move.b  (a1, d1), d4    ; D4 contains the table value of the corresponding base-10 digit
+0000004A                            55  
+0000004A                            56  * Set pen width to the desired width
+Line 57 ERROR: Undefined symbol
+0000004A  203C 004DBD16             57      move.l  #TASK_SET_PEN_WIDTH, d0
+Line 58 ERROR: Undefined symbol
+00000050  223C 004DBD16             58      move.l  #SEVEN_SEGMENT_PEN_WIDTH, d1
+00000056  4E4F                      59      trap    #15
+00000058                            60      
+00000058                            61  * Set pen color
+Line 62 ERROR: Undefined symbol
+00000058  203C 004DBD16             62      move.l  #TASK_SET_PEN_COLOR, d0
+Line 63 ERROR: Undefined symbol
+0000005E  223C 004DBD16             63      move.l  #SEVEN_SEGMENT_COLOR, d1
+00000064  4E4F                      64      trap    #15
+00000066                            65      
+Line 66 ERROR: Comma expected
+00000066                            66      move.l  #SEVEN_SEGMENT_LOOP_LIMIT-1, d5     ; Loop counter
+00000066                            67  
+Line 68 ERROR: Symbol value differs between first and second pass
+00000066                            68  drawSevenSegmentLoop:
+00000066  1C04                      69      move.b  d4, d6
+00000068  CC3C 0001                 70      and.b   #1, d6
+0000006C  BC3C 0001                 71      cmp.b   #1, d6      ; Check whether the last digit is 0 or 1
+00000070  6600 009C                 72      bne     skipDrawingDigit
+00000074                            73  
+00000074                            74  * Actually draw the digit corresponding to the reversed index D5
+00000074  2C05                      75      move.l  d5, d6
+00000076                            76      
+Line 77 ERROR: Invalid syntax
+00000076                            77      sub.l   #LONG_OFFSET*5, sp
+00000076  48D7 001F                 78      movem.l d0-d4, (sp)                         ; Save context
+0000007A                            79      
+Line 80 ERROR: Undefined symbol
+0000007A  203C 004DBD16             80      move.l  #TASK_DRAW_LINE, d0
+00000080                            81      
+00000080                            82  * Set Old D2 = D1 = D3 = OriginX, OldD3 = D2 = D4 = OriginY
+00000080  3202                      83      move.w  d2, d1
+00000082  3403                      84      move.w  d3, d2
+00000084  3601                      85      move.w  d1, d3
+00000086  3802                      86      move.w  d2, d4
+00000088                            87      
+00000088                            88  * Add the offset
+Line 89 ERROR: Undefined symbol
+00000088  43F9 004DBD16             89      lea     SevenSegStartOffsetX, a1
+0000008E  1E31 6000                 90      move.b  (a1, d6), d7                        ; Get the offset
+Line 91 ERROR: Undefined symbol
+00000092  CEFC BD16                 91      mulu.w  #SEVEN_SEGMENT_LENGTH, d7           ; Scale by the length
+00000096  D247                      92      add.w   d7, d1                              ; Then add to the respective drawing parameter
+00000098                            93      
+Line 94 ERROR: Undefined symbol
+00000098  43F9 004DBD16             94      lea     SevenSegStartOffsetY, a1
+0000009E  1E31 6000                 95      move.b  (a1, d6), d7                        ; Get the offset
+Line 96 ERROR: Undefined symbol
+000000A2  CEFC BD16                 96      mulu.w  #SEVEN_SEGMENT_LENGTH, d7           ; Scale by the length
+000000A6  D447                      97      add.w   d7, d2                              ; Then add to the respective drawing parameter
+000000A8                            98      
+Line 99 ERROR: Undefined symbol
+000000A8  43F9 004DBD16             99      lea     SevenSegEndOffsetX, a1
+000000AE  1E31 6000                100      move.b  (a1, d6), d7                        ; Get the offset
+Line 101 ERROR: Undefined symbol
+000000B2  CEFC BD16                101      mulu.w  #SEVEN_SEGMENT_LENGTH, d7           ; Scale by the length
+000000B6  D647                     102      add.w   d7, d3                              ; Then add to the respective drawing parameter
+000000B8                           103      
+Line 104 ERROR: Undefined symbol
+000000B8  43F9 004DBD16            104      lea     SevenSegEndOffsetY, a1
+000000BE  1E31 6000                105      move.b  (a1, d6), d7                        ; Get the offset
+Line 106 ERROR: Undefined symbol
+000000C2  CEFC BD16                106      mulu.w  #SEVEN_SEGMENT_LENGTH, d7           ; Scale by the length
+000000C6  D847                     107      add.w   d7, d4                              ; Then add to the respective drawing parameter
+000000C8                           108      
+000000C8  4E4F                     109      trap    #15
+000000CA                           110      
+000000CA  4CD7 001F                111      movem.l (sp), d0-d4
+Line 112 ERROR: Invalid syntax
+000000CE                           112      add.l   #LONG_OFFSET*5, sp                  ; Load context
+000000CE                           113      
+Line 114 ERROR: Symbol value differs between first and second pass
+000000CE                           114  skipDrawingDigit:
+000000CE                           115  * Will also have to redraw background chunk later here
+000000CE  E20C                     116      lsr.b   #1, d4      ; Shift to the next digit
+000000D0  51CD FFC8                117      dbra    d5, drawSevenSegmentLoop
+000000D4                           118      
+000000D4                           119  * Set the pen width back to default
+Line 120 ERROR: Undefined symbol
+000000D4  203C 004DBD16            120      move.l  #TASK_SET_PEN_WIDTH, d0
+Line 121 ERROR: Undefined symbol
+000000DA  223C 004DBD16            121      move.l  #DEFAULT_PEN_WIDTH, d1
+000000E0  4E4F                     122      trap   #15
+000000E2                           123  
+000000E2  4E75                     124      rts
+000000E4                           125  
+000000E4                           126  
+Line 127 WARNING: END directive missing, starting address not set
+
+37 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+DRAWSEVENSEGMENT    0
+DRAWSEVENSEGMENTLOOP  9A
+SKIPDRAWINGDIGIT    10E
